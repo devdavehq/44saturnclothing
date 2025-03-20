@@ -14,7 +14,7 @@ const About = () => {
     const fetchHero = async () => {
       const res = await get('/get_hero'); // Fetch orders from the API
       if (res.data) {
-        console.log(res.data.msg);
+        // console.log(res.data.msg);
         setImg(`${import.meta.env.VITE_SERVER_URL}/${res.data.msg[0].aboutimg}`)
         // Set the fetched data to state
       }

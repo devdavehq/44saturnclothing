@@ -12,7 +12,7 @@ const ShopPage = () => {
     const [loading, setLoading] = useState(true);
     const [products, setProducts] = useState([]);
     const [quantities, setQuantities] = useState({}); // { product_id: quantity }
-    const [cart, setCart] = useState([]); // Local cart state for instant updates
+    const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []); // Fetch cart from local storage
 
     const navigate = useNavigate();
 
@@ -63,11 +63,15 @@ const ShopPage = () => {
     // Add to cart function
     const addToCart = async (product_id, size, quantity, image, amount) => {
         try {
-            // Update local cart state instantly
-            setCart((prevCart) => [
-                ...prevCart,
-                { product_id, size, quantity, image, amount },
-            ]);
+            const newCartItem = { product_id, size, quantity, image, amount };
+
+            // Update local cart state
+            setCart((prevCart) => {
+                const updatedCart = [...prevCart, newCartItem];
+                // Update localStorage immediately
+                localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+                return updatedCart;
+            });
 
             // Sync with the server in the background
             let formData = new FormData();
@@ -85,7 +89,11 @@ const ShopPage = () => {
         } catch (error) {
             console.error('Error adding to cart:', error);
             // Revert local state if the API call fails
-            setCart((prevCart) => prevCart.filter((item) => item.product_id !== product_id));
+            setCart((prevCart) => {
+                const revertedCart = prevCart.filter((item) => item.product_id !== product_id);
+                localStorage.setItem('cartMultiple', JSON.stringify(revertedCart));
+                return revertedCart;
+            });
         }
     };
 

@@ -7,16 +7,55 @@ const ProductCard = () => {
   const [products, setProducts] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
   const [quan, setQuan] = useState({}); // Track quantity for each product
-  const [cart, setCart] = useState([]); // Local cart state for instant updates
+  const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []); // Local cart state for instant updates
+
+  // Add this useEffect to listen for cart updates
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+      setCart(storedCart);
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, []);
 
   // Add to cart function
-  const addToCart = async (product_id, size, quantity, image, amount) => {
+  const addToCart = async (product_id, size, quantity, image, amount, name) => {
     try {
-      // Update local cart state instantly
-      setCart((prevCart) => [
-        ...prevCart,
-        { product_id, size, quantity, image, amount },
-      ]);
+      // Check if item with same product_id and size exists
+      const existingItemIndex = cart.findIndex(
+        item => item.product_id === product_id && item.size === size.toLowerCase()
+      );
+
+      setCart((prevCart) => {
+        let updatedCart;
+        if (existingItemIndex !== -1) {
+          // Update existing item
+          updatedCart = prevCart.map((item, index) => 
+            index === existingItemIndex 
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+        } else {
+          // Add new item
+          updatedCart = [...prevCart, { 
+            product_id, 
+            size: size.toLowerCase(), 
+            quantity, 
+            image, 
+            amount,
+            name 
+          }];
+        }
+        localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+        // Dispatch custom event to notify NavBar
+        window.dispatchEvent(new Event('cartUpdated'));
+        return updatedCart;
+      });
 
       // Send API request in the background
       let formData = new FormData();
@@ -31,10 +70,17 @@ const ProductCard = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+
     } catch (error) {
       console.error('Error adding to cart:', error);
       // Revert local state if the API call fails
-      setCart((prevCart) => prevCart.filter((item) => item.product_id !== product_id));
+      setCart((prevCart) => {
+        const revertedCart = prevCart.filter((item) => item.product_id !== product_id);
+        localStorage.setItem('cartMultiple', JSON.stringify(revertedCart));
+        // Dispatch custom event even on error
+        window.dispatchEvent(new Event('cartUpdated'));
+        return revertedCart;
+      });
     }
   };
 
@@ -133,7 +179,7 @@ const ProductCard = () => {
                       ...prev,
                       [product.product_id]: newQuantity,
                     }));
-                    addToCart(product.product_id, product.sizes[0], 1, product.mainImage, Math.max(...product.prices)); // Always add 1
+                    addToCart(product.product_id, product.sizes[0], 1, product.mainImage, Math.max(...product.prices), product.name);
                   }}
                 />
               </div>
