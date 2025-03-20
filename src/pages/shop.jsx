@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import NavBar from '../components/LandingPage/NavBar';
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,68 +12,118 @@ const ShopPage = () => {
     const [loading, setLoading] = useState(true);
     const [products, setProducts] = useState([]);
     const [quantities, setQuantities] = useState({}); // { product_id: quantity }
-    const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []); // Fetch cart from local storage
+    const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []);
 
     const navigate = useNavigate();
 
-    // Fetch products on component mount
+    // Memoized function to process product data
+    const processProductData = useCallback((item) => {
+        const mainImage = item.image_url ? `${import.meta.env.VITE_SERVER_URL}/${JSON.parse(item.image_url)[0]}` : '';
+        const hoverImage = item.hoverImage ? `${import.meta.env.VITE_SERVER_URL}/${item.hoverImage}` : '';
+
+        let sizes = [];
+        let prices = [];
+        try {
+            const priceArray = JSON.parse(item.price_size);
+            if (Array.isArray(priceArray)) {
+                sizes = priceArray.map((ps) => ps.size);
+                prices = priceArray.map((ps) => ps.price);
+            }
+        } catch (error) {
+            console.error("Error parsing price_size:", error);
+        }
+
+        return {
+            ...item,
+            mainImage,
+            hoverImage,
+            sizes,
+            prices,
+        };
+    }, []);
+
+    // Cart update listener
     useEffect(() => {
+        const handleCartUpdate = () => {
+            const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+            setCart(storedCart);
+        };
+
+        window.addEventListener('cartUpdated', handleCartUpdate);
+        return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    }, []);
+
+    // Optimized product fetching
+    useEffect(() => {
+        let isMounted = true;
+
         const fetchProducts = async () => {
-            setLoading(true);
             try {
                 const res = await get("/display_products");
+                if (!isMounted) return;
+
                 if (res.error) throw new Error(res.error);
 
                 if (res.data) {
-                    const data = res.data.msg.map(item => {
-                        let mainImage = item.image_url ? `${import.meta.env.VITE_SERVER_URL}/${JSON.parse(item.image_url)[0]}` : '';
-                        let hoverImage = item.hoverImage ? `${import.meta.env.VITE_SERVER_URL}/${item.hoverImage}` : '';
-
-                        let sizes = [];
-                        let prices = [];
-                        const priceArray = JSON.parse(item.price_size);
-                        if (Array.isArray(priceArray)) {
-                            sizes = priceArray.map((ps) => ps.size);
-                            prices = priceArray.map((ps) => ps.price);
-                        } else {
-                            console.error("price_size is not a valid array:", item.price_size);
+                    // Process products in batches for better performance
+                    const batchSize = 10;
+                    
+                    for (let i = 0; i < res.data.msg.length; i += batchSize) {
+                        const batch = res.data.msg.slice(i, i + batchSize);
+                        const processedBatch = batch.map(processProductData);
+                        
+                        if (isMounted) {
+                            setProducts(prev => [...prev, ...processedBatch]);
+                            if (i === 0) setLoading(false); // Show first batch immediately
                         }
-
-                        return {
-                            ...item,
-                            mainImage,
-                            hoverImage,
-                            sizes,
-                            prices,
-                        };
-                    });
-
-                    setProducts(data);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching products:", error);
-            } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
+        setLoading(true);
+        setProducts([]); // Reset products before fetching
         fetchProducts();
-    }, []);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [processProductData]);
 
     // Add to cart function
-    const addToCart = async (product_id, size, quantity, image, amount) => {
+    const addToCart = async (product_id, size, quantity, image, amount, name) => {
         try {
-            const newCartItem = { product_id, size, quantity, image, amount };
+            const existingItemIndex = cart.findIndex(
+                item => item.product_id === product_id && item.size === size.toLowerCase()
+            );
 
-            // Update local cart state
             setCart((prevCart) => {
-                const updatedCart = [...prevCart, newCartItem];
-                // Update localStorage immediately
+                let updatedCart;
+                if (existingItemIndex !== -1) {
+                    updatedCart = prevCart.map((item, index) => 
+                        index === existingItemIndex 
+                            ? { ...item, quantity: item.quantity + quantity }
+                            : item
+                    );
+                } else {
+                    updatedCart = [...prevCart, { 
+                        product_id, 
+                        size: size.toLowerCase(), 
+                        quantity, 
+                        image, 
+                        amount,
+                        name 
+                    }];
+                }
                 localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+                window.dispatchEvent(new Event('cartUpdated'));
                 return updatedCart;
             });
 
-            // Sync with the server in the background
+            // API call in background
             let formData = new FormData();
             formData.append('product_id', product_id);
             formData.append('size', size.toLowerCase());
@@ -88,12 +138,6 @@ const ShopPage = () => {
             });
         } catch (error) {
             console.error('Error adding to cart:', error);
-            // Revert local state if the API call fails
-            setCart((prevCart) => {
-                const revertedCart = prevCart.filter((item) => item.product_id !== product_id);
-                localStorage.setItem('cartMultiple', JSON.stringify(revertedCart));
-                return revertedCart;
-            });
         }
     };
 
@@ -201,7 +245,7 @@ const ShopPage = () => {
                                                 ...prev,
                                                 [item.product_id]: newQuantity,
                                             }));
-                                            addToCart(item.product_id, item.sizes[0], 1, item.mainImage, Math.max(...item.prices)); // Always add 1
+                                            addToCart(item.product_id, item.sizes[0], 1, item.mainImage, Math.max(...item.prices), item.name);
                                         }}
                                     />
                                 </div>

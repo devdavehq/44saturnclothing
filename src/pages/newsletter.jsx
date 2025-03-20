@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { post } from '../api'; // Ensure this path is correct
+import { assets } from "../../Images/assets";
 
 const NewsletterPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,10 +10,21 @@ const NewsletterPopup = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    const hasSubscribed = localStorage.getItem('news');
-    if (!hasSubscribed) {
-      setIsOpen(true); // Show popup initially
-    }
+    const checkSubscription = () => {
+      const hasSubscribed = localStorage.getItem('news');
+      if (!hasSubscribed) {
+        setIsOpen(true); // Show popup if not subscribed
+      }
+    };
+
+    // Check immediately on mount
+    checkSubscription();
+
+    // Set interval to check every minute (60000 ms)
+    const intervalId = setInterval(checkSubscription, 60000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -48,17 +60,18 @@ const NewsletterPopup = () => {
           exit={{ opacity: 0, scale: 0.8 }}
         >
           <button
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-5xl"
             onClick={() => setIsOpen(false)}
             aria-label="Close newsletter popup"
           >
             &times;
           </button>
-
-          <div
-            className="w-full h-40 bg-cover bg-center rounded-lg"
-            style={{ backgroundImage: "url('https://source.unsplash.com/600x400/?fashion')" }}
-          />
+          <img
+                    src={assets.logo}
+                    alt="Logo"
+                    className="p-4  text-xl font-semibold w-[100px] ml-[170px] mb-10 rounded-full shadow-md object-cover object-center"
+                />
+          
 
           <h2 className="text-center text-2xl font-bold mt-4">Subscribe to Our Newsletter</h2>
           <p className="text-center text-gray-600 mt-2">
@@ -77,7 +90,7 @@ const NewsletterPopup = () => {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
+                
               />
               <button
                 type="submit"
