@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Search, ShoppingBag, X, Minus, Plus, ChevronDown, ShoppingCart } from "lucide-react";
 import { FaBars } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { get, put, del } from '../../api'
+import { get, post, del } from '../../api';
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -14,88 +14,124 @@ const NavBar = () => {
   const [cartActive, setCartActive] = useState(false);
   const [cartItems, setCartItems] = useState([]);
 
+  // Ref for the cart drawer
+  const cartRef = useRef(null);
+
+  // Close cart when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (cartRef.current && !cartRef.current.contains(event.target)) {
+        setIsCartOpen(false);
+      }
+    };
+
+    // Add event listener when the cart is open
+    if (isCartOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup event listener
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isCartOpen]);
+
   // Fetch cart items from the backend
-// Fetch cart items from the backend
-const fetchCart = async () => {
-  try {
-    const data = await get('/cart');
-    return data;
-  } catch (error) {
-    console.error('Error fetching cart:', error);
-    return [];
-  }
-};
-
-// Add item to cart
-// const addToCart = async (product_id, size, quantity) => {
-//   try {
-//     const data = await put('/cart/add', { product_id, size, quantity });
-//     return data.cart;
-//   } catch (error) {
-//     console.error('Error adding to cart:', error);
-//     return [];
-//   }
-// };
-
-// Update cart item quantity
-    const updateCartItemQuantity = async (product_id, quantity, size) => {
-      try {
-        const data = await put('/cart/update', { product_id, quantity, size });
-        return data.cart;
-      } catch (error) {
-        console.error('Error updating cart:', error);
-        return [];
+  const fetchCart = async () => {
+    try {
+      const { data, error } = await get('/cart');
+      if (error) {
+        throw new Error(error.message || 'Failed to fetch cart');
       }
+      return data.cart || [];
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      return [];
+    }
+  };
+
+  const updateCartItemQuantity = async (cart_id, quantity) => {
+    try {
+      let formData = new FormData()
+      formData.append('cart_id', cart_id);
+      formData.append('quantity', quantity);
+      const { data, error } = await post('/cart/update', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+      if (error) {
+        throw new Error(error.message || 'Failed to update cart');
+      }
+      return data.cart || [];
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      return [];
+    }
+  };
+
+  const removeCartItem = async (cart_id) => {
+    try {
+      const { data, error } = await del('/cart/remove', { cart_id });
+      if (error) {
+        throw new Error(error.message || 'Failed to remove item from cart');
+      }
+      return data.cart || [];
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const fetchCartData = async () => {
+      const cartData = await fetchCart();
+      setCartItems(cartData);
+      setCartActive(cartData.length > 0);
     };
 
-// Remove item from cart
-    const removeCartItem = async (product_id) => {
-      try {
-        const data = await del('/cart/remove', { product_id });
-        return data.cart;
-      } catch (error) {
-        console.error('Error removing from cart:', error);
-        return [];
-      }
-    };
+    fetchCartData();
+    const intervalId = setInterval(fetchCartData, 5000); // Poll every 10 seconds
+    return () => clearInterval(intervalId);
+  }, []);
 
-    useEffect(() => {
-      const fetchCartData = async () => {
-        const cartData = await fetchCart();
-        console.log('cart',cartData);
-        
-        setCartItems(cartData);
-        setCartActive(cartData.length > 0);
-      };
-
-      fetchCartData();
-      const intervalId = setInterval(fetchCartData, 10000); // Poll every 10 seconds
-      return () => clearInterval(intervalId);
-    }, []);
-
-    const handleUpdateCartItemQuantity = async (id, delta) => {
-      const item = cartItems.find((item) => item.product_id === id);
-      if (item) {
-        const newQuantity = item.quantity + delta;
-        if (newQuantity > 0) {
-          const updatedCart = await updateCartItemQuantity(id, newQuantity, item.size);
-          setCartItems(updatedCart);
-        } else {
-          const updatedCart = await removeCartItem(id);
-          setCartItems(updatedCart);
+  const handleUpdateCartItemQuantity = async (cart_id, delta) => {
+    const item = cartItems.find((item) => item.cart_id === cart_id);
+    if (item) {
+      const newQuantity = item.quantity + delta;
+      if (newQuantity > 0) {
+        const updatedCart = await updateCartItemQuantity(cart_id, newQuantity);
+        if (updatedCart && Array.isArray(updatedCart)) {
+          setCartItems(updatedCart); // Update the state with the new cart data
+        }
+      } else {
+        const updatedCart = await updateCartItemQuantity(cart_id, newQuantity);
+        if (updatedCart && Array.isArray(updatedCart)) {
+          setCartItems(updatedCart); // Update the state with the new cart data
         }
       }
-    };
+    }
+  };
 
-    const handleRemoveCartItem = async (id) => {
-      const updatedCart = await removeCartItem(id);
-      setCartItems(updatedCart);
-    };
+  const handleRemoveCartItem = async (cart_id) => {
+    const updatedCart = await removeCartItem(cart_id);
+    if (updatedCart && Array.isArray(updatedCart)) {
+      setCartItems(updatedCart); // Update the state with the new cart data
+    }
+  };
+
   // Calculate total price
-  // const totalPrice = cartItems.reduce(
-  //   (total, item) => total + item.price * item.quantity,
-  //   0
-  // );
+  const totalPrice = cartItems.reduce((total, item) => {
+    try {
+      const prices = JSON.parse(item.price_size || '[]');
+      const priceObj = prices.find((p) => p.size === item.size);
+      const price = priceObj ? parseFloat(priceObj.price) : 0;
+      return total + price * item.quantity;
+    } catch (error) {
+      console.error("Error calculating price for item:", item, error);
+      return total;
+    }
+  }, 0);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow w-full">
@@ -186,6 +222,7 @@ const fetchCart = async () => {
             <Link
               key={path}
               to={path}
+              onClick={() => setIsShopDropdownOpen(false)} // Close dropdown on link click
               className={`block py-2 px-4 relative transition-all duration-300 ease-in-out ${
                 location.pathname === path
                   ? "text-lg after:transition-all after:duration-300 after:ease-in-out"
@@ -202,6 +239,7 @@ const fetchCart = async () => {
       <AnimatePresence>
         {isCartOpen && (
           <motion.div
+            ref={cartRef} // Attach ref to the cart drawer
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -214,30 +252,45 @@ const fetchCart = async () => {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="mt-4 space-y-4 p-4">
+            <div className="mt-4 space-y-4 p-4 overflow-y-scroll">
               {cartItems.length > 0 ? (
-                cartItems.map((item) => (
-                  <div key={item.product_id} className="flex items-center space-x-4 border-b dark:border-gray-700 pb-2">
-                    <img src={item.image_url} alt={item.name} className="h-16 w-16 object-cover rounded" />
-                    <div className="flex-grow">
-                      <h3 className="font-semibold">{item.name}</h3>
-                      <p>
-                        {currency} {item.price.toLocaleString()} x {item.quantity}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button className="p-1 border rounded" onClick={() => handleUpdateCartItemQuantity(item.product_id, -1)}>
-                        <Minus className="h-4 w-4" />
+                cartItems.map((item) => {
+                  let price = 0;
+                  try {
+                    const prices = JSON.parse(item.price_size || '[]');
+                    const priceObj = prices.find((p) => p.size === item.size);
+                    price = priceObj ? parseFloat(priceObj.price) : 0;
+                  } catch (error) {
+                    console.error("Error parsing price for item:", item, error);
+                  }
+
+                  return (
+                    <div key={item.cart_id} className="flex items-center space-x-4 border-b dark:border-gray-700 pb-2">
+                      <img
+                        src={`${import.meta.env.VITE_SERVER_URL}/${item.hoverImage}`} // Construct the full image URL
+                        alt={item.name}
+                        className="h-16 w-16 object-cover rounded"
+                      />
+                      <div className="flex-grow">
+                        <h3 className="font-semibold">{item.name}</h3>
+                        <p>
+                          {currency} {price.toLocaleString()} x {item.quantity}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button className="p-1 border rounded" onClick={() => handleUpdateCartItemQuantity(item.cart_id, -1)}>
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <button className="p-1 border rounded" onClick={() => handleUpdateCartItemQuantity(item.cart_id, 1)}>
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <button className="p-1 border rounded text-red-600" onClick={() => handleRemoveCartItem(item.cart_id)}>
+                        <X className="h-4 w-4" />
                       </button>
-                      <button className="p-1 border rounded" onClick={() => handleUpdateCartItemQuantity(item.product_id, 1)}>
-                        <Plus className="h-4 w-4" />
-                      </button>
                     </div>
-                    <button className="p-1 border rounded text-red-600" onClick={() => handleRemoveCartItem(item.product_id)}>
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <>
                   <div>
@@ -253,19 +306,19 @@ const fetchCart = async () => {
               )}
             </div>
             {cartItems.length > 0 && (
-              <div className="mt-[290px] border-t dark:border-gray-700 pt-2 ">
+              <div className="border-t dark:border-gray-700 pt-2 ">
                 <div className="flex justify-between items-center py-4">
                   <span className="font-semibold">Total:</span>
                   <span>
                     {currency} {totalPrice.toLocaleString()}
                   </span>
                 </div>
-                <Link
-                  to={`/checkout${ids}`}
+                <button
+                  to={`/product/checkout/${cartItems.map((item) => item.product_id).join(',')}`}
                   className="text-center px-20 md:w-48 text-sm font-bold bg-black py-3 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out"
                 >
                   Checkout
-                </Link>
+                </button>
               </div>
             )}
           </motion.div>
@@ -276,5 +329,3 @@ const fetchCart = async () => {
 };
 
 export default NavBar;
-// { id: 1, name: "T-Shirt", price: 5000, quantity: 1, image: "path/to/tshirt.jpg" },
-    // { id: 2, name: "Jeans", price: 12000, quantity: 2, image: "path/to/jeans.jpg" },

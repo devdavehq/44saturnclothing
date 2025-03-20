@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance with default settings
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000', // Set your base URL here
+  baseURL: `${import.meta.env.VITE_SERVER_URL}`, // Set your base URL here
   // withCredentials: true,
 });
 

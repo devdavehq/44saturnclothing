@@ -17,7 +17,7 @@ import Login from './pages/admin/login';
 
 
 
-// import ProductPage from './pages/ProductPage'
+import ProductPage from './pages/ProductPage'
 import ResetPassword from './pages/admin/reset-password';
 import ResetPasswordToken from './pages/admin/reset-password-token';
 
@@ -39,7 +39,7 @@ function App() {
         <Route path="admin/reset-password" element={<ResetPassword />} />
         <Route path="admin/reset-password/:token" element={<ResetPasswordToken />} />
      
-        {/* <Route path="/product/:name" element={<ProductPage />} />i */}
+        <Route path="/product/:productName" element={<ProductPage />} />i
 
       </Routes>
     </Router>

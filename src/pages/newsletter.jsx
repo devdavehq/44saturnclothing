@@ -1,35 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { post } from '../api'; // Ensure this path is correct
 
 const NewsletterPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     const hasSubscribed = localStorage.getItem('news');
-
     if (!hasSubscribed) {
       setIsOpen(true); // Show popup initially
-
-      const interval = setInterval(() => {
-        if (!localStorage.getItem('news')) {
-          setIsOpen(true);
-        } else {
-          clearInterval(interval); // Stop showing the popup if subscribed
-        }
-      }, 5 * 60 * 1000); // 5 minutes
-
-      return () => clearInterval(interval); // Cleanup on unmount
     }
   }, []);
 
-  const handleSubmit = () => {
-    if (!email.trim()) {
-      alert('Please provide a valid email'); // Use alert for better UX
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setError(''); // Clear previous error
+    setSuccess('');
+
+    try {
+      let formData = new FormData();
+      formData.append('email', email);
+      const res = await post('/newsletter', formData);
+
+      if (res.data && res.data.msg === 'Email saved successfully') {
+        localStorage.setItem('news', res.data.msg);
+        setSuccess(res.data.msg);
+        setIsOpen(false);
+      } else if (res.error) {
+        setError(res.error.err || 'An error occurred. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
     }
-    localStorage.setItem('newsletterSubscribed', 'true'); // Save subscription status
-    setIsOpen(false);
   };
 
   return (
@@ -41,14 +47,15 @@ const NewsletterPopup = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
         >
-          <button 
+          <button
             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
             onClick={() => setIsOpen(false)}
+            aria-label="Close newsletter popup"
           >
             &times;
           </button>
-          
-          <div 
+
+          <div
             className="w-full h-40 bg-cover bg-center rounded-lg"
             style={{ backgroundImage: "url('https://source.unsplash.com/600x400/?fashion')" }}
           />
@@ -58,21 +65,28 @@ const NewsletterPopup = () => {
             Stay updated with our latest products and offers!
           </p>
 
-          <div className="mt-4">
-            <input 
-              type="email"
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <button 
-              className="w-full bg-black text-white py-2 mt-3 rounded-lg hover:bg-gray-800"
-              onClick={handleSubmit}
-            >
-              Subscribe
-            </button>
-          </div>
+          <form onSubmit={handleSubmit}>
+            {error && <p className="text-red-700 p-5">{error}</p>}
+            {success && <p className="text-green-700 p-5">{success}</p>}
+            <div className="mt-4">
+              <label htmlFor="email" className="sr-only">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <button
+                type="submit"
+                className="w-full bg-black text-white py-2 mt-3 rounded-lg hover:bg-gray-800"
+              >
+                Subscribe
+              </button>
+            </div>
+          </form>
         </motion.div>
       </div>
     )

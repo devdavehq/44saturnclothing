@@ -1,69 +1,62 @@
-import { assets } from '../../../Images/assets'
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { ShoppingCart, CreditCard } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ShoppingCart } from 'lucide-react';
 import { get, post } from '../../api';
 
 const ProductCard = () => {
-  const [products, setProducts] = useState([]); // Initialize with an empty array
-  const [isHovered, setIsHovered] = useState(false); // State for hover effect
-  const [quan, setQuan] = useState(1); // Initialize with 1 or any default value
+  const [products, setProducts] = useState([]);
+  const [isHovered, setIsHovered] = useState(false);
+  const [quan, setQuan] = useState({}); // Track quantity for each product
+  const [cart, setCart] = useState([]); // Local cart state for instant updates
 
-  const addToCart = async (product_id, size, quantity) => {
+  // Add to cart function
+  const addToCart = async (product_id, size, quantity, image, amount) => {
     try {
-      console.log('Adding to cart:', { product_id, size, quantity }); // Debugging
+      // Update local cart state instantly
+      setCart((prevCart) => [
+        ...prevCart,
+        { product_id, size, quantity, image, amount },
+      ]);
+
+      // Send API request in the background
       let formData = new FormData();
       formData.append('product_id', product_id);
       formData.append('size', size.toLowerCase());
       formData.append('quantity', quantity);
-  
-      const data = await post('/cart/add', formData, {
+      formData.append('image', image);
+      formData.append('amount', amount);
+
+      await post('/cart/add', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      console.log('Cart response:', data); // Debugging
-  
-      // Update cart items state
-      // if (data.cart && Array.isArray(data.cart)) {
-        // setProducts((items) => [...items, ...data.cart]); // Append cart items
-        localStorage.setItem('cart', JSON.stringify(data.cart))
-        console.log(localStorage.getItem('cart'));
-        
-      // } else {
-      //   console.error('Invalid cart data:', data.cart);
-      // }
-  
-      return data.cart;
     } catch (error) {
       console.error('Error adding to cart:', error);
-      return [];
+      // Revert local state if the API call fails
+      setCart((prevCart) => prevCart.filter((item) => item.product_id !== product_id));
     }
   };
 
   // Fetch products
   useEffect(() => {
-    let isMounted = true; // Track if the component is mounted
-    let isFetching = false; // Track if an API call is in progress
-  
+    let isMounted = true;
+    let isFetching = false;
+
     const fetchRecentOrders = async () => {
-      if (isFetching) return; // Skip if an API call is already in progress
+      if (isFetching) return;
       isFetching = true;
-  
+
       try {
-        const res = await get("/display_products");
+        const res = await get('/display_products');
         if (res.error) throw new Error(res.error);
-  
-        // console.log("API Response:", res); // Debugging: Log the entire response
-  
+
         if (res.data && isMounted) {
-          const data = res.data.msg.map(item => {
-            // console.log("Processing Item:", item); // Debugging: Log each item
-  
-            // Check if `image_url` exists and is valid
-            let mainImage = item.image_url ? `${import.meta.env.VITE_SERVER_URL}/${JSON.parse(item.image_url)[0]}` : '';
-  
-            // Check if `price_size` exists and is valid
+          const data = res.data.msg.map((item) => {
+            let mainImage = item.image_url
+              ? `${import.meta.env.VITE_SERVER_URL}/${JSON.parse(item.image_url)[0]}`
+              : '';
+
             let sizes = [];
             let prices = [];
             const priceArray = JSON.parse(item.price_size);
@@ -71,9 +64,9 @@ const ProductCard = () => {
               sizes = priceArray.map((ps) => ps.size);
               prices = priceArray.map((ps) => ps.price);
             } else {
-              console.error("price_size is not a valid array:", item.price_size);
+              console.error('price_size is not a valid array:', item.price_size);
             }
-  
+
             return {
               ...item,
               mainImage,
@@ -81,23 +74,22 @@ const ProductCard = () => {
               prices,
             };
           });
-  
-          // console.log("Processed Data:", data); // Debugging: Log the processed data
+
           setProducts(data);
         }
       } catch (error) {
-        console.error("Error fetching user products:", error);
+        console.error('Error fetching user products:', error);
       } finally {
-        isFetching = false; // Reset the flag after the API call is complete
+        isFetching = false;
       }
     };
-  
-    fetchRecentOrders();
-    const intervalId = setInterval(fetchRecentOrders, 10000); // Poll every 10 seconds
-  
+
+    fetchRecentOrders(); // Fetch products on component mount
+    const intervalId = setInterval(fetchRecentOrders, 5500); // Poll every 10 seconds
+
     return () => {
-      isMounted = false; // Mark the component as unmounted
-      clearInterval(intervalId); // Clear the interval
+      isMounted = false;
+      clearInterval(intervalId);
     };
   }, []);
 
@@ -127,16 +119,21 @@ const ProductCard = () => {
                 </div>
               )}
               <div className="mt-4 ml-4 relative">
-                <a href={`/product/${product.name}`}><h3 className="text-lg font-semibold">{product.name}</h3></a>
-                {/* Display the highest price */}
+                <a href={`/product/${product.name}`}>
+                  <h3 className="text-lg font-semibold">{product.name}</h3>
+                </a>
                 <p className="text-gray-600">
                   ₦{Math.max(...product.prices).toLocaleString()}
                 </p>
-                <ShoppingCart className='bg-black text-white p-1 rounded-sm absolute right-4 top-4'
+                <ShoppingCart
+                  className="bg-black text-white p-1 rounded-sm absolute right-4 top-4 cursor-pointer"
                   onClick={() => {
-                    const newQuantity = quan + 1; // Increment the quantity
-                    setQuan(newQuantity); // Update the state
-                    addToCart(product.product_id, product.sizes[0], newQuantity); // Pass the updated quantity
+                    const newQuantity = (quan[product.product_id] || 0) + 1;
+                    setQuan((prev) => ({
+                      ...prev,
+                      [product.product_id]: newQuantity,
+                    }));
+                    addToCart(product.product_id, product.sizes[0], 1, product.mainImage, Math.max(...product.prices)); // Always add 1
                   }}
                 />
               </div>
