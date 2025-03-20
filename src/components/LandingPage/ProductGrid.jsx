@@ -26,7 +26,6 @@ const ProductCard = () => {
   // Add to cart function
   const addToCart = async (product_id, size, quantity, image, amount, name) => {
     try {
-      // Check if item with same product_id and size exists
       const existingItemIndex = cart.findIndex(
         item => item.product_id === product_id && item.size === size.toLowerCase()
       );
@@ -34,14 +33,12 @@ const ProductCard = () => {
       setCart((prevCart) => {
         let updatedCart;
         if (existingItemIndex !== -1) {
-          // Update existing item
           updatedCart = prevCart.map((item, index) => 
             index === existingItemIndex 
               ? { ...item, quantity: item.quantity + quantity }
               : item
-          );
+          ).filter(item => item.quantity > 0);
         } else {
-          // Add new item
           updatedCart = [...prevCart, { 
             product_id, 
             size: size.toLowerCase(), 
@@ -52,7 +49,6 @@ const ProductCard = () => {
           }];
         }
         localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
-        // Dispatch custom event to notify NavBar
         window.dispatchEvent(new Event('cartUpdated'));
         return updatedCart;
       });
@@ -73,11 +69,9 @@ const ProductCard = () => {
 
     } catch (error) {
       console.error('Error adding to cart:', error);
-      // Revert local state if the API call fails
       setCart((prevCart) => {
         const revertedCart = prevCart.filter((item) => item.product_id !== product_id);
         localStorage.setItem('cartMultiple', JSON.stringify(revertedCart));
-        // Dispatch custom event even on error
         window.dispatchEvent(new Event('cartUpdated'));
         return revertedCart;
       });

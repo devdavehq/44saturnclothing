@@ -4,33 +4,30 @@ import axios from 'axios';
 import { ShoppingCart } from 'lucide-react';
 import { get, post, put, del } from '../api'
 
-const PaymentForm = ({ amount, product }) => {
+const PaymentForm = ({ products }) => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [shippingAddress, setShippingAddress] = useState('');
     const [billingSameAsShipping, setBillingSameAsShipping] = useState(false);
-    const [email, setEmail] = useState(''); // State for email
-    const [phone, setPhone] = useState(''); // State for email
-
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setError(null);
         setSuccess(null);
 
+        let formData = new FormData();
+        formData.append('email', email);
+        formData.append('phone', phone);
+        formData.append('address', shippingAddress);
+        formData.append('total_amount', amount);
+        formData.append('products', JSON.stringify(products)); // Include cart details
 
-        
-        let formData = new FormData()
-        formData.append('email', email)
-        formData.append('phone', phone)
-        formData.append('address', shippingAddress)
-        // formData.append('', )
         try {
-            // Send order details to the backend to create an order and initialize payment
             const response = await post('http://localhost:3000/create-order', formData);
-
-            const { authorization_url } = response.data; // Get the authorization URL from the response
-            window.location.href = authorization_url; // Redirect the user to Paystack for payment
+            const { authorization_url } = response.data;
+            window.location.href = authorization_url;
         } catch (error) {
             setError('Error processing payment: ' + error.message);
         }
@@ -51,7 +48,7 @@ const PaymentForm = ({ amount, product }) => {
                         <input
                             type="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)} // Update email state
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full p-3 border-slate-300 rounded-md"
                             required
                         />
@@ -61,7 +58,7 @@ const PaymentForm = ({ amount, product }) => {
                         <input
                             type="text"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)} // Update email state
+                            onChange={(e) => setPhone(e.target.value)}
                             className="w-full p-3 border-slate-300 rounded-md"
                             required
                         />
@@ -87,7 +84,7 @@ const PaymentForm = ({ amount, product }) => {
                         <label htmlFor="billing" className="text-gray-700">Billing address same as shipping</label>
                     </div>
                     <button type="submit" className="w-full bg-black text-white py-3 rounded-md flex items-center justify-center">
-                    <ShoppingCart className="mr-2" /> Pay ₦{(1000)} {/* Display amount in Naira */}
+                        <ShoppingCart className="mr-2" /> Pay ₦{amount}
                     </button>
                     {error && <div className="mt-4 text-red-500">{error}</div>}
                     {success && <div className="mt-4 text-green-500">{success}</div>}
@@ -97,7 +94,16 @@ const PaymentForm = ({ amount, product }) => {
             {/* Order Summary */}
             <div className="md:w-1/2 p-6 bg-gray-100 border-l">
                 <h2 className="text-xl font-bold">Order Summary</h2>
-               
+                {products.map((product, index) => (
+                    <div key={index} className="flex justify-between py-2 border-b">
+                        <span>{product.name} ({product.size})</span>
+                        <span>₦{product.amount.toLocaleString()} x {product.quantity}</span>
+                    </div>
+                ))}
+                <div className="flex justify-between py-2 font-bold">
+                    <span>Total</span>
+                    <span>₦{amount.toLocaleString()}</span>
+                </div>
             </div>
         </div>
     );

@@ -15,15 +15,18 @@ const NavBar = () => {
     // Ref for the cart drawer
     const cartRef = useRef(null);
 
-    // Listen for cart updates
+    // Update the useEffect to listen for custom events
     useEffect(() => {
         const handleCartUpdate = () => {
             const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
             setCartItems(storedCart);
         };
 
+        // Listen for our custom event
         window.addEventListener('cartUpdated', handleCartUpdate);
-        handleCartUpdate(); // Initial load
+        
+        // Initial load
+        handleCartUpdate();
         
         return () => {
             window.removeEventListener('cartUpdated', handleCartUpdate);
@@ -54,70 +57,30 @@ const NavBar = () => {
         return total + item.amount * item.quantity;
     }, 0);
 
-    // Updated quantity handler
+    // Update the quantity change handler
     const updateQuantity = (productId, newQuantity) => {
         setCartItems((prevItems) => {
-            let updatedItems;
-            
-            // If quantity is less than 1, remove the item
-            if (newQuantity < 1) {
-                updatedItems = prevItems.filter(item => item.product_id !== productId);
-            } else {
-                // Otherwise update the quantity
-                updatedItems = prevItems.map(item =>
-                    item.product_id === productId 
-                        ? { ...item, quantity: newQuantity }
-                        : item
-                );
-            }
-
-            // Update localStorage and dispatch event
+            const updatedItems = prevItems.map(item =>
+                item.product_id === productId 
+                    ? { ...item, quantity: newQuantity }
+                    : item
+            ).filter(item => item.quantity > 0); // Remove items with quantity < 1
+    
             localStorage.setItem('cartMultiple', JSON.stringify(updatedItems));
             window.dispatchEvent(new Event('cartUpdated'));
-            
             return updatedItems;
         });
     };
 
-    // Cart item JSX with updated quantity controls
-    const renderCartItem = (item) => (
-        <div key={item.product_id} className="flex items-center space-x-4 border-b dark:border-gray-700 pb-2">
-            <img
-                src={item.image}
-                alt={item.name}
-                className="h-16 w-16 object-cover rounded"
-            />
-            <div className="flex-grow">
-                <h3 className="font-semibold">{item.name}</h3>
-                <p>
-                    {currency} {item.amount.toLocaleString()} x {item.quantity}
-                </p>
-                <p className="text-sm text-gray-500">Size: {item.size.toUpperCase()}</p>
-            </div>
-            <div className="flex items-center space-x-2">
-                <button 
-                    className="p-1 border rounded hover:bg-gray-100" 
-                    onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
-                >
-                    <Minus className="h-4 w-4" />
-                </button>
-                <span className="w-8 text-center">{item.quantity}</span>
-                <button 
-                    className="p-1 border rounded hover:bg-gray-100" 
-                    onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
-                >
-                    <Plus className="h-4 w-4" />
-                </button>
-            </div>
-            <button 
-                className="p-1 border rounded text-red-600 hover:bg-red-50" 
-                onClick={() => updateQuantity(item.product_id, 0)} // Set quantity to 0 to remove
-                aria-label="Remove item"
-            >
-                <X className="h-4 w-4" />
-            </button>
-        </div>
-    );
+    // Update the remove item handler
+    const removeItem = (productId) => {
+        setCartItems((prevItems) => {
+            const updatedItems = prevItems.filter(item => item.product_id !== productId);
+            localStorage.setItem('cartMultiple', JSON.stringify(updatedItems));
+            window.dispatchEvent(new Event('cartUpdated'));
+            return updatedItems;
+        });
+    };
 
     // Update the checkout handler
     const handleCheckout = () => {
@@ -250,7 +213,45 @@ const NavBar = () => {
                         </div>
                         <div className="mt-4 space-y-4 p-4 overflow-y-scroll">
                             {cartItems.length > 0 ? (
-                                cartItems.map(renderCartItem)
+                                cartItems.map((item) => (
+                                    <div key={item.product_id} className="flex items-center space-x-4 border-b dark:border-gray-700 pb-2">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="h-16 w-16 object-cover rounded"
+                                        />
+                                        <div className="flex-grow">
+                                            <h3 className="font-semibold">{item.name}</h3>
+                                            <p>
+                                                {currency} {item.amount.toLocaleString()} x {item.quantity}
+                                            </p>
+                                            <p className="text-sm text-gray-500">Size: {item.size.toUpperCase()}</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <button 
+                                                className="p-1 border rounded hover:bg-gray-100" 
+                                                onClick={() => updateQuantity(item.product_id, Math.max(1, item.quantity - 1))}
+                                                disabled={item.quantity <= 1}
+                                            >
+                                                <Minus className="h-4 w-4" />
+                                            </button>
+                                            <span className="w-8 text-center">{item.quantity}</span>
+                                            <button 
+                                                className="p-1 border rounded hover:bg-gray-100" 
+                                                onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                        <button 
+                                            className="p-1 border rounded text-red-600 hover:bg-red-50" 
+                                            onClick={() => removeItem(item.product_id)}
+                                            aria-label="Remove item"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ))
                             ) : (
                                 <>
                                     <div>
@@ -275,7 +276,7 @@ const NavBar = () => {
                                 </div>
                                 <button
                                     onClick={handleCheckout}
-                                    className="text-center px-1 w-48 text-sm font-bold bg-black py-3 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out"
+                                    className="text-center  md:w-48 text-sm font-bold bg-black py-3 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out"
                                 >
                                     Checkout
                                 </button>
