@@ -90,14 +90,7 @@ const NavBar = () => {
             const updatedItems = prevItems.filter(item => 
                 !(item.product_id === productId && item.size === size) // Remove item if both productId and size match
             );
-
-            // If the cart is empty, remove it from localStorage
-            if (updatedItems.length === 0) {
-                localStorage.removeItem('cartMultiple');
-            } else {
-                localStorage.setItem('cartMultiple', JSON.stringify(updatedItems));
-            }
-
+            localStorage.setItem('cartMultiple', JSON.stringify(updatedItems));
             window.dispatchEvent(new Event('cartUpdated'));
             return updatedItems;
         });
@@ -231,10 +224,10 @@ const NavBar = () => {
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
-                        <div className="mt-4 space-y-4 p-4 overflow-y-scroll">
+                        <div className="max-h-[60%] overflow-y-auto"> {/* Scrollable container for cart items */}
                             {cartItems.length > 0 ? (
                                 cartItems.map((item) => (
-                                    <div key={item.product_id} className="flex items-center space-x-4 border-b dark:border-gray-700 pb-2">
+                                    <div key={`${item.product_id}-${item.size}`} className="flex items-center space-x-4 border-b dark:border-gray-700 p-4">
                                         <img
                                             src={item.image}
                                             alt={item.name}
@@ -274,7 +267,7 @@ const NavBar = () => {
                                 ))
                             ) : (
                                 <>
-                                    <div>
+                                    <div className="">
                                         <p className="text-center w-full text-2xl font-extrabold">Your cart is empty.</p>
                                         <button
                                             className="text-center w-full md:w-48 text-sm font-bold bg-black py-4 px-12 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out transform hover:translate-y-1 ml-[70px] mt-4"
@@ -287,7 +280,7 @@ const NavBar = () => {
                             )}
                         </div>
                         {cartItems.length > 0 && (
-                            <div className="border-t dark:border-gray-700 pt-2 ">
+                            <div className="border-t dark:border-gray-700 pt-2 mt-10">
                                 <div className="flex justify-between items-center py-4">
                                     <span className="font-semibold">Total:</span>
                                     <span>
