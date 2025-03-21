@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import { get, post } from '../../api';
@@ -10,18 +10,36 @@ const ProductCard = () => {
   const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []); // Local cart state for instant updates
 
   // Add this useEffect to listen for cart updates
-  useEffect(() => {
-    const handleCartUpdate = () => {
-      const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
-      setCart(storedCart);
-    };
+  const cartInitializedRef = useRef(false);
 
-    window.addEventListener('cartUpdated', handleCartUpdate);
-    
-    return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdate);
-    };
-  }, []);
+    // Ref for the cart drawer
+
+    // Initialize cart items only once
+    useEffect(() => {
+        if (!cartInitializedRef.current) {
+            const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+            setCart(storedCart);
+            cartInitializedRef.current = true;
+        }
+    }, []);
+
+    // Listen for cart updates with a ref to prevent circular updates
+    useEffect(() => {
+        const handleCartUpdate = () => {
+            // Use setTimeout to defer the state update to the next tick
+            // This breaks the circular dependency during render
+            setTimeout(() => {
+                const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+                setCart(storedCart);
+            }, 0);
+        };
+
+        window.addEventListener('cartUpdated', handleCartUpdate);
+        
+        return () => {
+            window.removeEventListener('cartUpdated', handleCartUpdate);
+        };
+    }, []);
 
   // Add to cart function
   const addToCart = async (product_id, size, quantity, image, amount, name) => {
@@ -44,7 +62,7 @@ const ProductCard = () => {
             size: size.toLowerCase(), 
             quantity, 
             image, 
-            amount,
+            amount: amount * quantity,
             name 
           }];
         }
@@ -59,7 +77,7 @@ const ProductCard = () => {
       formData.append('size', size.toLowerCase());
       formData.append('quantity', quantity);
       formData.append('image', image);
-      formData.append('amount', amount);
+      formData.append('amount', amount * quantity);
 
       await post('/cart/add', formData, {
         headers: {

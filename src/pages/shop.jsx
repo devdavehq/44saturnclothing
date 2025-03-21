@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import NavBar from '../components/LandingPage/NavBar';
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -12,7 +12,8 @@ const ShopPage = () => {
     const [loading, setLoading] = useState(true);
     const [products, setProducts] = useState([]);
     const [quantities, setQuantities] = useState({}); // { product_id: quantity }
-    const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []);
+    const [cart, setCart] = useState([]);
+    const cartInitializedRef = useRef(false);
 
     const navigate = useNavigate();
 
@@ -42,11 +43,23 @@ const ShopPage = () => {
         };
     }, []);
 
-    // Cart update listener
+    // Initialize cart only once
     useEffect(() => {
-        const handleCartUpdate = () => {
+        if (!cartInitializedRef.current) {
             const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
             setCart(storedCart);
+            cartInitializedRef.current = true;
+        }
+    }, []);
+
+    // Cart update listener with setTimeout to break circular dependency
+    useEffect(() => {
+        const handleCartUpdate = () => {
+            // Use setTimeout to defer the state update to the next tick
+            setTimeout(() => {
+                const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+                setCart(storedCart);
+            }, 0);
         };
 
         window.addEventListener('cartUpdated', handleCartUpdate);
@@ -100,28 +113,34 @@ const ShopPage = () => {
                 item => item.product_id === product_id && item.size === size.toLowerCase()
             );
 
-            setCart((prevCart) => {
-                let updatedCart;
-                if (existingItemIndex !== -1) {
-                    updatedCart = prevCart.map((item, index) => 
-                        index === existingItemIndex 
-                            ? { ...item, quantity: item.quantity + quantity }
-                            : item
-                    );
-                } else {
-                    updatedCart = [...prevCart, { 
-                        product_id, 
-                        size: size.toLowerCase(), 
-                        quantity, 
-                        image, 
-                        amount,
-                        name 
-                    }];
-                }
-                localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+            const updatedCart = [...cart];
+            
+            if (existingItemIndex !== -1) {
+                updatedCart[existingItemIndex] = {
+                    ...updatedCart[existingItemIndex],
+                    quantity: updatedCart[existingItemIndex].quantity + quantity
+                };
+            } else {
+                updatedCart.push({ 
+                    product_id, 
+                    size: size.toLowerCase(), 
+                    quantity, 
+                    image, 
+                    amount: amount * quantity,
+                    name 
+                });
+            }
+            
+            // Update localStorage first
+            localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+            
+            // Then update state
+            setCart(updatedCart);
+            
+            // Dispatch event after state is updated
+            setTimeout(() => {
                 window.dispatchEvent(new Event('cartUpdated'));
-                return updatedCart;
-            });
+            }, 0);
 
             // API call in background
             let formData = new FormData();
@@ -129,7 +148,7 @@ const ShopPage = () => {
             formData.append('size', size.toLowerCase());
             formData.append('quantity', quantity);
             formData.append('image', image);
-            formData.append('amount', amount);
+            formData.append('amount', amount * quantity);
 
             await post('/cart/add', formData, {
                 headers: {

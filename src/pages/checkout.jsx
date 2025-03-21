@@ -16,14 +16,20 @@ const CheckoutPage = () => {
     // let url = 
 
     const [cart, setCart] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
 
     useEffect(() => {
         // Retrieve cart from localStorage
         const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
         setCart(storedCart);
-
-        // Calculate total amount
+        
+        // Get total amount from localStorage
        
+            // Calculate total if not stored
+            const calculatedTotal = storedCart.reduce((total, item) => 
+                total + (item.amount * item.quantity), 0);
+            setTotalAmount(calculatedTotal);
+        
     }, []);
 
     return (
@@ -31,7 +37,14 @@ const CheckoutPage = () => {
             <NavBar />
             <div>
                 <h2>Checkout</h2>
-                <PaymentForm products={cart} />
+                <PaymentForm products={cart} totalAmount={totalAmount} />
+                <ul>
+                    {cart.map((item, index) => (
+                        <li key={`${item.product_id}-${item.size}-${index}`}>
+                            {item.name} - {item.size} - {item.quantity}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </>
     );

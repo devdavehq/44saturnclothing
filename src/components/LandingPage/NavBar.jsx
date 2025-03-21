@@ -10,23 +10,33 @@ const NavBar = () => {
     const [isCurrencyMenuOpen, setIsCurrencyMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isShopDropdownOpen, setIsShopDropdownOpen] = useState(false);
-    const [cartItems, setCartItems] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []);
+    const [cartItems, setCartItems] = useState([]);
+    const cartInitializedRef = useRef(false);
 
     // Ref for the cart drawer
     const cartRef = useRef(null);
 
-    // Update the useEffect to listen for custom events
+    // Initialize cart items only once
     useEffect(() => {
-        const handleCartUpdate = () => {
+        if (!cartInitializedRef.current) {
             const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
             setCartItems(storedCart);
+            cartInitializedRef.current = true;
+        }
+    }, []);
+
+    // Listen for cart updates with a ref to prevent circular updates
+    useEffect(() => {
+        const handleCartUpdate = () => {
+            // Use setTimeout to defer the state update to the next tick
+            // This breaks the circular dependency during render
+            setTimeout(() => {
+                const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+                setCartItems(storedCart);
+            }, 0);
         };
 
-        // Listen for our custom event
         window.addEventListener('cartUpdated', handleCartUpdate);
-        
-        // Initial load
-        handleCartUpdate();
         
         return () => {
             window.removeEventListener('cartUpdated', handleCartUpdate);
@@ -54,8 +64,10 @@ const NavBar = () => {
 
     // Calculate total price
     const totalPrice = cartItems.reduce((total, item) => {
-        return total + item.amount * item.quantity;
+        return total + (item.amount * item.quantity);
     }, 0);
+
+    
 
     // Update the quantity change handler
     const updateQuantity = (productId, newQuantity) => {
@@ -73,22 +85,30 @@ const NavBar = () => {
     };
 
     // Update the remove item handler
-    const removeItem = (productId) => {
+    const removeItem = (productId, size) => {
         setCartItems((prevItems) => {
-            const updatedItems = prevItems.filter(item => item.product_id !== productId);
-            localStorage.setItem('cartMultiple', JSON.stringify(updatedItems));
+            const updatedItems = prevItems.filter(item => 
+                !(item.product_id === productId && item.size === size) // Remove item if both productId and size match
+            );
+
+            // If the cart is empty, remove it from localStorage
+            if (updatedItems.length === 0) {
+                localStorage.removeItem('cartMultiple');
+            } else {
+                localStorage.setItem('cartMultiple', JSON.stringify(updatedItems));
+            }
+
             window.dispatchEvent(new Event('cartUpdated'));
             return updatedItems;
         });
     };
 
-    // Update the checkout handler
+    // Handle checkout with total as separate value
     const handleCheckout = () => {
-        const itemsWithFinalAmount = cartItems.map(item => ({
-            ...item,
-            finalAmount: item.amount * item.quantity
-        }));
-        localStorage.setItem('cartMultiple', JSON.stringify(itemsWithFinalAmount));
+        // Store total amount in localStorage
+        localStorage.setItem('cartMultiple', JSON.stringify(cartItems));
+        
+        // Navigate to checkout with product IDs
         navigate(`/product/checkout/${cartItems.map((item) => item.product_id).join(',')}`);
     };
 
@@ -245,7 +265,7 @@ const NavBar = () => {
                                         </div>
                                         <button 
                                             className="p-1 border rounded text-red-600 hover:bg-red-50" 
-                                            onClick={() => removeItem(item.product_id)}
+                                            onClick={() => removeItem(item.product_id, item.size)}
                                             aria-label="Remove item"
                                         >
                                             <X className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import NavBar from '../components/LandingPage/NavBar';
@@ -18,10 +18,28 @@ const ProductPage = () => {
     const { productName } = useParams();
 
     // Add this useEffect to listen for cart updates
+    const cartInitializedRef = useRef(false);
+
+    // Ref for the cart drawer
+
+    // Initialize cart items only once
     useEffect(() => {
-        const handleCartUpdate = () => {
+        if (!cartInitializedRef.current) {
             const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
             setCart(storedCart);
+            cartInitializedRef.current = true;
+        }
+    }, []);
+
+    // Listen for cart updates with a ref to prevent circular updates
+    useEffect(() => {
+        const handleCartUpdate = () => {
+            // Use setTimeout to defer the state update to the next tick
+            // This breaks the circular dependency during render
+            setTimeout(() => {
+                const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+                setCart(storedCart);
+            }, 0);
         };
 
         window.addEventListener('cartUpdated', handleCartUpdate);
@@ -38,36 +56,41 @@ const ProductPage = () => {
                 item => item.product_id === product_id && item.size === size.toLowerCase()
             );
 
-            setCart((prevCart) => {
-                let updatedCart;
-                if (existingItemIndex !== -1) {
-                    updatedCart = prevCart.map((item, index) => 
-                        index === existingItemIndex 
-                            ? { ...item, quantity: item.quantity + quantity }
-                            : item
-                    );
-                } else {
-                    updatedCart = [...prevCart, { 
-                        product_id, 
-                        size: size.toLowerCase(), 
-                        quantity, 
-                        image, 
-                        amount,
-                        name 
-                    }];
-                }
-                localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
-                // Dispatch custom event to notify NavBar
+            const updatedCart = [...cart];
+            
+            if (existingItemIndex !== -1) {
+                updatedCart[existingItemIndex] = {
+                    ...updatedCart[existingItemIndex],
+                    quantity: updatedCart[existingItemIndex].quantity + quantity
+                };
+            } else {
+                updatedCart.push({ 
+                    product_id, 
+                    size: size.toLowerCase(), 
+                    quantity, 
+                    image, 
+                    amount: amount * quantity,
+                    name 
+                });
+            }
+            
+            // Update localStorage first
+            localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+            
+            // Then update state
+            setCart(updatedCart);
+            
+            // Dispatch event after state is updated
+            setTimeout(() => {
                 window.dispatchEvent(new Event('cartUpdated'));
-                return updatedCart;
-            });
+            }, 0);
 
-            // Sync with the server in the background
             let formData = new FormData();
             formData.append('product_id', product_id);
             formData.append('size', size.toLowerCase());
             formData.append('quantity', quantity);
             formData.append('image', image);
+            formData.append('amount', amount * quantity);
 
             await post('/cart/add', formData, {
                 headers: {
@@ -76,13 +99,6 @@ const ProductPage = () => {
             });
         } catch (error) {
             console.error('Error adding to cart:', error);
-            setCart((prevCart) => {
-                const revertedCart = prevCart.filter((item) => item.product_id !== product_id);
-                localStorage.setItem('cartMultiple', JSON.stringify(revertedCart));
-                // Dispatch custom event even on error
-                window.dispatchEvent(new Event('cartUpdated'));
-                return revertedCart;
-            });
         }
     };
 
@@ -217,13 +233,16 @@ const ProductPage = () => {
                                     ...prev,
                                     [mainProduct.product_id]: newQuantity,
                                 }));
-                                addToCart(mainProduct.product_id, selectedSize.toLowerCase(), 1, mainProduct.hoverImage, parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price, mainProduct.name);
+                                addToCart(mainProduct.product_id, selectedSize.toLowerCase(), 1, `${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`, parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price, mainProduct.name);
                             }}
                         >
                             Add to Cart
                         </button>
                         <button className="w-full mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-300"
-                            onClick={() => navigate(`/product/checkout/${mainProduct.product_id}`)}
+                            onClick={() => {
+                                addToCart(mainProduct.product_id, selectedSize.toLowerCase(), 1, `${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`, parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price, mainProduct.name);
+                                navigate(`/product/checkout/${mainProduct.product_id}`);
+                            }}
                         >
                             Buy It Now
                         </button>
