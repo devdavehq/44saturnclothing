@@ -246,9 +246,9 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                             </div>
                             <div className="mb-6">
                                 <p className="text-sm text-gray-600">
-                                    Please ensure you have made the payment to the following bank account:
+                                    Please ensure you have made the payment to the bank account swnt to your Email:
                                 </p>
-                                <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                                {/* <div className="mt-2 p-4 bg-gray-50 rounded-lg">
                                     <p className="text-sm text-gray-700">
                                         <strong>Bank Name:</strong> GTB
                                     </p>
@@ -258,7 +258,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                                     <p className="text-sm text-gray-700">
                                         <strong>Account Name:</strong> Osabia Michael Ayomide
                                     </p>
-                                </div>
+                                </div> */}
                                 <p className="mt-2 text-sm text-red-600">
                                     Note: Your payment will not be reflected if you do not pay to the account above.
                                 </p>
