@@ -18,7 +18,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/shop" element={<Shop />} />
-        <Route path="/product/checkout/:id" element={<CheckoutPage />} />
+        <Route path="/product/checkout/:productId" element={<CheckoutPage />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin/dashboard/*" element={<Dashboard />} />

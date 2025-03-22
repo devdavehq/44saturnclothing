@@ -50,7 +50,7 @@ const Settings = () => {
         try {
             const res = await post("/website-details", formData);
     
-            console.log(res); // Log the response for debugging
+            // console.log(res); // Log the response for debugging
     
             if (res.data.msg === "Website details updated successfully") {
                 Swal.fire({
@@ -95,7 +95,7 @@ const Settings = () => {
                 confirmButtonText: 'OK',
                 confirmButtonColor: 'black',
             })
-            console.log(data)
+            // console.log(data)
             
         }else{
             setErrors('')
@@ -106,7 +106,7 @@ const Settings = () => {
                 confirmButtonText: 'OK',
                 confirmButtonColor: 'black'
             })
-            console.log(error);
+            // console.log(error);
             
         }
 

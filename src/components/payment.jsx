@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { MdAccountBalance } from 'react-icons/md'; // Importing the bank icon from Material Designimport { ShoppingCart } from 'lucide-react';
+import { MdAccountBalance } from 'react-icons/md'; // Importing the bank icon from Material Design
 import { ShoppingCart } from 'lucide-react';
 import { get, post, put, del } from '../api';
 import Swal from 'sweetalert2';
+import { FaCreditCard, FaMoneyCheckAlt } from 'react-icons/fa';
 
 const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
     const [error, setError] = useState(null);
@@ -15,6 +16,8 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
     const [paymentMethod, setPaymentMethod] = useState('paystack');
     const [showReferenceForm, setShowReferenceForm] = useState(false);
     const [referenceId, setReferenceId] = useState('');
+    const [bankName, setBankName] = useState(''); // New state for bank name
+    const [loading, setLoading] = useState(false); // New state for loader
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -30,6 +33,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
         const trimmedEmail = email.trim();
         const trimmedPhone = phone.trim();
         const trimmedShippingAddress = shippingAddress.trim();
+        const trimmedBankName = bankName.trim(); // Trim bank name
 
         if (!trimmedEmail || !trimmedPhone || !trimmedShippingAddress) {
             setError('Please fill in all required fields.');
@@ -43,9 +47,9 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
         formData.append('total_amount', totalAmount);
         formData.append('products', JSON.stringify(products));
 
-        // Log the form data to ensure it's correct
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
+        // Conditionally add bank name to form data if it's available
+        if (paymentMethod === 'bank' && trimmedBankName) {
+            formData.append('bank_name', trimmedBankName);
         }
 
         try {
@@ -56,9 +60,8 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
             });
             const { msg, ref } = response.data;
             setSuccess(msg);
-            // console.log(response.data);
             if (ref) {
-                setShowReferenceForm(true)
+                setShowReferenceForm(true);
             }
         } catch (error) {
             if (error.response && error.response.data && error.response.data.msg) {
@@ -75,45 +78,57 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
         event.preventDefault();
         setError(null);
         setSuccess(null);
+        setLoading(true); // Start loading
 
         if (paymentMethod === 'bank' && referenceId === '') {
             setRefError('Please enter your reference ID.');
+            setLoading(false); // Stop loading
             return;
         }
 
-    
-            try {
-                let formData = new FormData();
-                formData.append('reference_id', referenceId);
-                formData.append('totalAmount', totalAmount);
-                const response = await post('/verify-reference', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                if (response.data.msg) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Payment Verified',
-                        text: response.data.msg,
-                    });
+        try {
+            let formData = new FormData();
+            formData.append('reference_id', referenceId);
+            formData.append('totalAmount', totalAmount);
+            const response = await post('/verify-reference', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
-                console.log(response);
-                
-                return setShowReferenceForm(false);
-            } catch (error) {
+            });
+
+            if (response.data.msg) {
+                // Show success message
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.msg || 'An error occurred while verifying the payment.',
+                    icon: 'success',
+                    title: 'Payment Initialized',
+                    text: response.data.msg,
                 });
-                console.log(error.msg);
+
+                // Remove the items from the cart
+                products.forEach((product) => {
+                    removeFromCart(product.product_id, product.size);
+                });
+
+                // Update local storage with the remaining cart items
+                const updatedCart = products.filter(
+                    (product) => !products.some(
+                        (item) => item.product_id === product.product_id && item.size === product.size
+                    )
+                );
+                localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+
+                // Close the reference form modal
+                setShowReferenceForm(false);
             }
-            
-        
-            
-       
-        // ORD2e2ada4f316f77d21f75809a8ee5749a117a7f0f
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.msg || 'An error occurred while verifying the payment.',
+            });
+        } finally {
+            setLoading(false); // Stop loading
+        }
     };
 
     return (
@@ -154,21 +169,23 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                             onChange={(e) => setPaymentMethod(e.target.value)}
                             className="w-full p-3 border-slate-300 rounded-md"
                         >
-                            <option value="paystack" disabled={true}>Pay with Paystack</option>
-                            <option value="bank">Pay with Bank</option>
+                            <option value="paystack" disabled={false}>Pay with Paystack </option>
+                            <option value="bank">Pay with Bank 💳</option>
                         </select>
                     </div>
-                    {paymentMethod === 'bank' && (
-                        <div className="mb-4">
-                            <button
-                                type="button"
-                                onClick={() => setShowReferenceForm(true)}
-                                className="w-full bg-blue-500 text-white py-3 rounded-md flex items-center justify-center"
-                            >
-                                <MdAccountBalance className="mr-2" /> Enter Reference ID
-                            </button>
-                        </div>
-                    )}
+                    {/* Bank Name Input Field */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Bank Name</label>
+                        <input
+                            type="text"
+                            value={bankName}
+                            onChange={(e) => setBankName(e.target.value)}
+                            className="w-full p-3 border-slate-300 rounded-md"
+                            placeholder="Enter your bank name"
+                            disabled={paymentMethod !== 'bank'} // Disable if payment method is not "bank"
+                        />
+                    </div>
+                    
                     <div className="flex items-center mb-4">
                         <input
                             type="checkbox"
@@ -192,7 +209,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                     {products.map((product, index) => (
                         <div key={`${product.product_id}-${product.size}`} className="flex justify-between py-2 border-b">
                             <span>{product.name} ({product.size})</span>
-                            <span>₦{product.amount.toLocaleString()} x {product.quantity}</span>
+                            <span>₦{product.amount} x {product.quantity}</span>
                             <button
                                 onClick={() => removeFromCart(product.product_id, product.size)}
                                 className="text-red-500 hover:text-red-700"
@@ -225,7 +242,6 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                                     onChange={(e) => setReferenceId(e.target.value)}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                                     placeholder="Enter your Reference ID"
-                                    
                                 />
                             </div>
                             <div className="mb-6">
@@ -250,8 +266,15 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                             <button
                                 type="submit"
                                 className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-900 transition duration-200"
+                                disabled={loading} // Disable button while loading
                             >
-                                Verify Payment
+                                {loading ? (
+                                    <div className="flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                                    </div>
+                                ) : (
+                                    'Verify Payment'
+                                )}
                             </button>
                         </form>
                     </div>

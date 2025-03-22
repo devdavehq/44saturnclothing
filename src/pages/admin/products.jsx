@@ -62,7 +62,8 @@ const Products = () => {
                     sizes = priceArray.map((ps) => ps.size);
                     prices = priceArray.map((ps) => ps.price);
                 } else {
-                    console.error("price_size is not a valid array:", item.price_size);
+                    // console.error("price_size is not a valid array:", item.price_size);
+                    return false
                 }
 
                 return {
@@ -75,9 +76,11 @@ const Products = () => {
             });
 
             setProductdata(transformedData); // Set the transformed data to state
-            console.log("Transformed data:", transformedData);
+            // console.log("Transformed data:", transformedData);
         } else {
-            console.log("No product data received.", response.error);
+            // console.log("No product data received.", response.error);
+            return false
+
         }
     };
 
@@ -392,8 +395,8 @@ const AddProduct = ({ onClose, currentProduct }) => {
                 confirmButtonColor: "black",
             });
         } else if (response.error) {
-            console.log("Error:", response.error.msg);
-            Swal.fire({
+            // console.log("Error:", response.error.msg);
+            return Swal.fire({
                 title: "Error!",
                 text: response.error.msg || "Something went wrong",
                 icon: "error",
@@ -416,123 +419,129 @@ const AddProduct = ({ onClose, currentProduct }) => {
 };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-lg w-full max-w-lg mx-auto" encType="multipart/form-data">
-      {err && <p className="text-red-700">{err}</p>}
-      <div>
-        <input
-          type="text"
-          value={pid}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          placeholder="productid..."
-          hidden
-        />
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-4">       
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Product Category:</label>
-        <input
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          placeholder="Category..."
-        />
-      </div>
+      <div className="flex-1 overflow-y-auto pb-10">
+        <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+          {err && <p className="text-red-700">{err}</p>}
+          <div>
+            <input
+              type="text"
+              value={pid}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              placeholder="productid..."
+              hidden
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Product Category:</label>
+            <input
+              type="text"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              placeholder="Category..."
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Product Name:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          placeholder="Name..."
-        />
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Product Name:</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              placeholder="Name..."
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Description:</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          placeholder="Description..."
-        ></textarea>
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Description:</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              placeholder="Description..."
+            ></textarea>
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Images: Max 2</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          multiple
-          name="images"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Hover Image</label>
-        <input
-          type="file"
-          onChange={(e) => setHoverImage(e.target.files[0])}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          name="hoverImage"
-        />
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Images: Max 2</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              multiple
+              name="images"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Hover Image</label>
+            <input
+              type="file"
+              onChange={(e) => setHoverImage(e.target.files[0])}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              name="hoverImage"
+            />
+          </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Stock Quantity:</label>
-        <input
-          type="number"
-          value={stockQuantity}
-          onChange={(e) => setStockQuantity(e.target.value)}
-          className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-        />
-      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Stock Quantity:</label>
+            <input
+              type="number"
+              value={stockQuantity}
+              onChange={(e) => setStockQuantity(e.target.value)}
+              className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+            />
+          </div>
 
-      {priceSizes.map((item, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="Size"
-            value={item.size}
-            onChange={(e) => updateSize(index, "size", e.target.value)}
-            className="w-1/3 p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          />
-          <input
-            type="number"
-            placeholder="Price"
-            value={item.price}
-            onChange={(e) => updateSize(index, "price", e.target.value)}
-            className="w-1/4 p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
-          />
+          {priceSizes.map((item, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <input
+                type="text"
+                placeholder="Size"
+                value={item.size}
+                onChange={(e) => updateSize(index, "size", e.target.value)}
+                className="w-1/3 p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Price"
+                value={item.price}
+                onChange={(e) => updateSize(index, "price", e.target.value)}
+                className="w-1/4 p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => removeSize(index)}
+                className="text-red-500 hover:text-red-700"
+              >
+                ✖
+              </button>
+            </div>
+          ))}
+
           <button
             type="button"
-            onClick={() => removeSize(index)}
-            className="text-red-500 hover:text-red-700"
+            onClick={addSize}
+            className="text-blue-500 hover:text-blue-700 text-lg mt-4" // Added mt-4 for margin-top
           >
-            ✖
+            add size +
           </button>
-        </div>
-      ))}
 
-      <button
-        type="button"
-        onClick={addSize}
-        className="text-blue-500 hover:text-blue-700 text-lg"
-      >
-        add size +
-      </button>
-
-      <div className="flex justify-end mt-4">
-        <button
-          type="submit"
-          className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700"
-        >
-          {currentProduct ? "Update Product" : "Save Product"}
-        </button>
+          <div className="flex justify-end mt-4">
+            <button
+              type="submit"
+              className="bg-black text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700"
+            >
+              {currentProduct ? "Update Product" : "Save Product"}
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 

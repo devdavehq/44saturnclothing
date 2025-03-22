@@ -8,6 +8,7 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
+import { AiFillCheckCircle } from "react-icons/ai";
 import { assets } from "../../../Images/assets";
 import { get, post, put, del } from '../../api'
 const Navbar = ({ setComponent }) => {
@@ -28,7 +29,7 @@ const Navbar = ({ setComponent }) => {
      if(data === 'logged out successfully') {
       localStorage.setItem('success', data)
       location.href = "/admin/login"
-      return console.log(data); 
+      // return console.log(data); 
 
      }
      localStorage.setItem('success', error)
@@ -102,6 +103,14 @@ const Navbar = ({ setComponent }) => {
               onClick={() => handleItemClick("products")}
             >
               <FaBoxes className="mr-3" /> Products
+            </li>
+            <li
+              className={`flex items-center px-4 py-3 hover:bg-gray-700 cursor-pointer ${
+                activeItem === "verify-orders" || location.pathname === 'verify-orders' ? "bg-gray-800 font-bold" : ""
+              }`}
+              onClick={() => handleItemClick("verify-orders")}
+            >
+              <AiFillCheckCircle className="mr-3" /> Verify Orders
             </li>
             <li
               className={`flex items-center px-4 py-3 hover:bg-gray-700 cursor-pointer ${

@@ -20,7 +20,7 @@ const ResetPasswordToken = () => {
       // Send the new password and token to the API
       const { data, error } = await post('/reset-password-token', { token, newPassword });
   
-      console.log('API Response:', { data, error }); // Log the response
+      // console.log('API Response:', { data, error }); // Log the response
   
       if (data) {
         setSuccessMessage('Password reset successfully! Redirecting to login page...');

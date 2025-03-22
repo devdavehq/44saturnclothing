@@ -7,6 +7,7 @@ import Orders from './orders';
 import Settings from './settings';
 import { get } from '../../api';
 import ProtectedRoute from './protected-route';
+import VerifyOrders from './verifyOrders';
 const Dashboard = () => {
     const navigate = useNavigate();
 
@@ -28,6 +29,7 @@ const Dashboard = () => {
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/products" element={<Products />} />
                         <Route path="/settings" element={<Settings />} />
+                        <Route path="/verify-orders" element={<VerifyOrders />} />
                     </Routes>
                 </main>
             </div>

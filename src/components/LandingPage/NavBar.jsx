@@ -236,7 +236,7 @@ const NavBar = () => {
                                         <div className="flex-grow">
                                             <h3 className="font-semibold">{item.name}</h3>
                                             <p>
-                                                {currency} {item.amount.toLocaleString()} x {item.quantity}
+                                                {currency} {item.amount} x {item.quantity}
                                             </p>
                                             <p className="text-sm text-gray-500">Size: {item.size.toUpperCase()}</p>
                                         </div>
