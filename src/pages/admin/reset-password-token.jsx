@@ -25,7 +25,7 @@ const ResetPasswordToken = () => {
       if (data) {
         setSuccessMessage('Password reset successfully! Redirecting to login page...');
         setTimeout(() => {
-          location.href = '../../admin/login'; // Redirect to login page after 3 seconds
+          location.href = 'https://shop.44saturnclothing.com/admin/login'; // Redirect to login page after 3 seconds
         }, 3000);
       }
   
