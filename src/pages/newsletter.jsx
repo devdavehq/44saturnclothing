@@ -21,7 +21,7 @@ const NewsletterPopup = () => {
     checkSubscription();
 
     // Set interval to check every minute (60000 ms)
-    const intervalId = setInterval(checkSubscription, 60000);
+    const intervalId = setInterval(checkSubscription, 120000);
 
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
