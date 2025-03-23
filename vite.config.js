@@ -9,5 +9,8 @@ export default defineConfig({
     alias: {
       '@component': resolve(__dirname, './src/components'),
     },
+  },
+  server:{
+    historyApiFallback: true
   }
 })

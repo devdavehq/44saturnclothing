@@ -1,5 +1,7 @@
 {
-    "routes": [
-      { "source": "/(.*)", "destination": "/index.html" }
+    "rewrites": [
+      { "source": "/admin/:path", "destination": "/" },
+      { "source": "/product/:path", "destination": "/" },
+      { "source": "/:path", "destination": "/" }
     ]
 }
