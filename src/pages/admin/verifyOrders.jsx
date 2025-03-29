@@ -192,7 +192,7 @@ const ValidateOrders = () => {
   return (
     <>
       <style>{fadeInStyle}</style> {/* Inject the fade-in CSS */}
-      <div className="p-8 w-full fade-in">
+      <div className="p-8 md:w-full fade-in w-full">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Item Summary</h1>
           <div className="relative">

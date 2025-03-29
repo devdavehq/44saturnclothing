@@ -12,18 +12,18 @@ const About = () => {
       {/* <img src={assets.img} alt="no img here" /> */}
       {/* <img src={assets.background} alt="no img here" className='mt-[65px] bg-slate-600 h-96 object-cover object-center w-full' /> */}
       <div className="py-24 pb-32">
-        <h1 className="text-center text-3xl font-bold">Contact</h1>
-        <div className='w-[50%] h-[1.3px] bg-slate-700' style={{ margin: "20px auto" }}></div>
-        <p className="text-justify text-wrap w-[50%] text-lg font-semibold" style={{ margin: "30px auto", wordSpacing: 2}}>Contact us:
+        <h1 className="md:text-center text-left md:px-0 px-4 text-3xl font-bold">Contact</h1>
+        <div className='md:w-[50%] w-[80%] h-[1.3px] bg-slate-700 my-[20px] md:mx-auto mx-5' ></div>
+        <p className="text-justify text-wrap md:w-[50%] w-[100%] md:px-0 px-4 text-lg font-semibold" style={{ margin: "30px auto", wordSpacing: 2}}>Contact us:
          </p>
-         <p className="text-justify text-wrap w-[50%] text-lg " style={{ margin: "10px auto", wordSpacing: 2, marginTop: "-20px"}}>For general inquiries & sales &nbsp;&nbsp;<a href='mailto:support@44saturnclothing.com' className='bg-slate-300'>support@44saturnclothing.com</a>
+         <p className="text-justify text-wrap md:w-[50%] w-[100%] md:px-0 px-4 text-lg " style={{ margin: "10px auto", wordSpacing: 2, marginTop: "-20px"}}>For general inquiries & sales &nbsp;&nbsp;<a href='mailto:44saturnclothing@gmail.com' className='bg-slate-300'>44saturnclothing@gmail.com</a>
          </p>
-         <p className="text-justify text-wrap w-[50%] text-lg font-semibold" style={{ margin: "30px auto", wordSpacing: 2}}>Follow us:
+         <p className="text-justify text-wrap md:w-[50%] w-[100%] md:px-0 px-4 text-lg font-semibold" style={{ margin: "30px auto", wordSpacing: 2}}>Follow us:
          </p>
          {/* <p className="text-justify text-wrap w-[50%] text-lg " style={{ margin: "10px auto", wordSpacing: 2, marginTop: "-20px"}}>For general inquiries & sales &nbsp;&nbsp;<a href='mailto:support@44saturnclo.com' className='bg-slate-300'>support@44saturnclo.com</a>
          </p>   
                  */}
-        <div className="flex gap-4 align-center align-middle w-[50%]" style={{ margin: "-5px auto"}}>
+        <div className="flex gap-4 align-center align-middle md:w-[50%] w-[100%] md:px-0 px-4" style={{ margin: "-5px auto"}}>
 
           <p className="text-justify text-wrap  text-lg"><a href="https://pin.it/4wgjktYRK" className="flex gap-4"><FaPinterest className="text-black cursor-pointer text-xl"/></a>
           </p>

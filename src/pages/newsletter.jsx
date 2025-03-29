@@ -69,7 +69,10 @@ const NewsletterPopup = () => {
           <img
                     src={assets.logo}
                     alt="Logo"
-                    className="p-4  text-xl font-semibold w-[100px] ml-[170px] mb-10 rounded-full shadow-md object-cover object-center"
+                    className="p-4  text-xl font-semibold w-[100px] mb-10 rounded-full shadow-md object-cover object-center"
+                  style={{
+                    margin: '30px auto'
+                  }}
                 />
           
 

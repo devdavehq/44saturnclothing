@@ -3,6 +3,7 @@ import { ShoppingCart, X, Minus, Plus, ChevronDown } from "lucide-react";
 import { FaBars } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import { assets } from "../../../Images/assets";
 
 const NavBar = () => {
     const navigate = useNavigate();
@@ -137,14 +138,21 @@ const NavBar = () => {
                     </button>
 
                     {/* Mobile Logo */}
-                    <Link to="/" className="md:hidden xl:hidden lg:hidden text-2xl font-serif italic">
+                    {/* <Link to="/" className="md:hidden xl:hidden lg:hidden text-2xl font-serif italic">
                         44saturn
+                    </Link> */}
+                    <Link to="/">
+                    <img
+                    src={assets.logo}
+                    alt="Logo"
+                    className="p-4 text-xl font-semibold w-[90px] rounded-full md:hidden xl:hidden lg:hidden"
+                    />
                     </Link>
 
                     {/* Actions */}
                     <div className="flex items-center space-x-4 md:space-x-4">
                         {/* Currency */}
-                        <div className="relative">
+                        <div className="relative md:block hidden">
                             <button onClick={() => setIsCurrencyMenuOpen((prev) => !prev)} className="text-sm tracking-widest flex items-center hover:text-gray-600 dark:hover:text-gray-300">
                                 {currency} <ChevronDown className="h-4 w-4 ml-1" />
                             </button>
@@ -267,10 +275,10 @@ const NavBar = () => {
                                 ))
                             ) : (
                                 <>
-                                    <div className="">
+                                    <div className="md:w-full w-[80%] md:p-0 p-5 md:block flex flex-col justify-center align-middle ml-7 md:ml-0">
                                         <p className="text-center w-full text-2xl font-extrabold">Your cart is empty.</p>
                                         <button
-                                            className="text-center w-full md:w-48 text-sm font-bold bg-black py-4 px-12 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out transform hover:translate-y-1 ml-[70px] mt-4"
+                                            className="text-center w-full md:w-48  text-sm font-bold bg-black py-4 md:px-12 px-0 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out transform hover:translate-y-1 md:ml-[70px] mt-4"
                                             onClick={() => navigate('/shop')}
                                         >
                                             Shop Now

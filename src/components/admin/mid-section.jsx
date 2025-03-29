@@ -150,7 +150,7 @@ const Dashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        <h1 className="text-[30px] font-bold text-slate-700 mx-2">{greeting}, 44SaturnClothings!</h1>
+        <h1 className="text-[20px] font-bold text-slate-700 mx-2 md:text-[30px]">{greeting}, 44SaturnClothings!</h1>
       </motion.header>
 
       {/* Metrics Section */}
@@ -167,8 +167,8 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: index * 0.2 }}
           >
-            <h2 className="text-lg font-semibold">{stat.label}</h2>
-            <p className="text-2xl font-bold">{stat.value}</p>
+            <h2 className="md:text-lg font-semibold text-[10px]">{stat.label}</h2>
+            <p className="md:text-2xl font-bold text-[15px]">{stat.value}</p>
           </motion.div>
         ))}
       </div>
@@ -219,7 +219,7 @@ const Dashboard = () => {
         </motion.div>
 
         <motion.div
-          className="w-full md:w-5/12 px-2"
+          className="w-full md:w-5/12 px-2 py-2 md:py-0"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}

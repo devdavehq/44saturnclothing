@@ -10,6 +10,7 @@ import Login from './pages/admin/login';
 import ProductPage from './pages/ProductPage';
 import ResetPassword from './pages/admin/reset-password';
 import ResetPasswordToken from './pages/admin/reset-password-token';
+import Page404 from './pages/404';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/admin/reset-password" element={<ResetPassword />} />
         <Route path="/admin/reset-password/:token" element={<ResetPasswordToken />} />
         <Route path="/product/:productName" element={<ProductPage />} />
+        <Route path="*" element={<Page404 />} />
       </Routes>
     </Router>
   );

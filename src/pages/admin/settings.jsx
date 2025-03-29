@@ -113,7 +113,7 @@ const Settings = () => {
             
     };
     return (
-        <>          
+        <>  
         <style>{fadeInStyle}</style>  
         <h2 className="text-3xl font-bold mb-4 fade-in">Settings</h2>
 
@@ -133,15 +133,15 @@ const Settings = () => {
             </div>
 
             {activeTab === "personal" && (
-                <div className="flex flex-row gap-8 fade-in">
+                <div className="flex md:flex-row gap-8 fade-in flex-col w-full">
                    <ProfileCard/>
                   
-                    <form className="space-y-4 w-[60%]" onSubmit={handleAdminSubmit}>
+                    <form className="space-y-4 md:w-[60%] w-full md:ml-0 ml-9" onSubmit={handleAdminSubmit}>
                     {errors && (
                         <p className="py-3 text-red-700">{errors}</p>
                    )}
                     
-                    <h2 className="text-3xl font-bold mb-4 mt-5">Update details</h2>
+                    <h2 className="text-3xl font-bold mb-4 mt-5 -ml-1">Update details</h2>
                        
                         <input
                             type="email"
@@ -171,9 +171,9 @@ const Settings = () => {
             )}
 
             {activeTab === "website" && (
-                <div className="flex flex-row gap-8 fade-in">
+                <div className="flex md:flex-row gap-8 fade-in flex-col w-full">
                 <ProfileCard/>
-                 <form className="space-y-4 w-[60%]" onSubmit={handleWebSubmit} encType="multipart/form-data">
+                 <form className="space-y-4 md:w-[60%] w-full md:ml-0 ml-9" onSubmit={handleWebSubmit} encType="multipart/form-data">
                  <h2 className="text-3xl font-bold mb-4 mt-5">Website Settings</h2>
 
                     <div>
@@ -211,7 +211,7 @@ const Settings = () => {
 
 const ProfileCard = () => {
     return (
-        <div className="flex flex-col items-center mb-4 bg-gray-100 p-4 rounded-lg shadow w-[40%]">
+        <div className="flex flex-col items-center mb-4 bg-gray-100 p-4 rounded-lg shadow md:w-[40%] w-full">
         {/* <div className="w-16  bg-gray-300 rounded-full mb-2"></div> */}
         <img
           src={assets.logo}
