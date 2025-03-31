@@ -25,12 +25,12 @@ const ResetPasswordToken = () => {
       if (data) {
         setSuccessMessage('Password reset successfully! Redirecting to login page...');
         setTimeout(() => {
-          location.href = 'https://shop.44saturnclothing.com/admin/login'; // Redirect to login page after 3 seconds
+          location.href = 'https://app.44saturnclothing.com/admin/login'; // Redirect to login page after 3 seconds
         }, 3000);
       }
   
       if (error) {
-        setErrorMessage(error.error || 'An error occurred. Please try again.');
+        setErrorMessage(error.msg || 'An error occurred. Please try again.');
       }
     } catch (err) {
       console.error('API Error:', err); // Log the error
