@@ -5,7 +5,7 @@ const ProtectedRoute = () => {
         return (
             <div className="h-screen flex items-center justify-center bg-purple-100">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-800">Ooh, Sorry Pal Page Does not Exist 😣</h1>
+                    <h1 className="text-4xl font-bold text-gray-800">Ooh, Sorry Pal Page Does not Exist ⚠😣</h1>
                     <p className="text-lg text-gray-600 mt-2">Back to the Home page</p>
                     <Link 
                         to="/" 
