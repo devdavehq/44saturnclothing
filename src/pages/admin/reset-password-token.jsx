@@ -15,10 +15,16 @@ const ResetPasswordToken = () => {
     e.preventDefault();
     setErrorMessage('');
     setIsLoading(true);
-  
+    let formData = new FormData();
+    formData.append('newPassword', newPassword);
+    formData.append('token', token);
     try {
       // Send the new password and token to the API
-      const { data, error } = await post('/reset-password-token', { token, newPassword });
+      const { data, error } = await post('/reset-password-token', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
   
       console.log('API Response:', { data, error }); // Log the response
   
