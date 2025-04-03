@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+<<<<<<< HEAD
+=======
+import { Link } from "react-router-dom";
+>>>>>>> 094bf57 (updated code and fixed issues)
 import { FaPinterest, FaInstagramSquare, FaTwitter , FaTiktok } from 'react-icons/fa';
 import { post } from '../../api'
 
@@ -43,6 +47,10 @@ const Newsletter = () => {
   
 
   return (
+<<<<<<< HEAD
+=======
+    <>
+>>>>>>> 094bf57 (updated code and fixed issues)
     <div className="bg-gray-100 py-12 px-6 md:px-16">
       <div className="max-w-2xl mx-auto text-center">
         <h2 className="text-2xl md:text-4xl font-bold mb-4">Stay Updated</h2>
@@ -75,7 +83,15 @@ const Newsletter = () => {
             <a href="https://www.tiktok.com/@44saturnclothing?_t=ZM-8uGv7PaZaDv&_r=1" className="flex gap-4"><FaTiktok className="text-black cursor-pointer text-xl"/></a>
         </div>
       </div>
+<<<<<<< HEAD
     </div>
+=======
+    
+    </div>
+    <p className="bg-gray-100 text-gray-600 text-sm text-center pb-3"><Link to="/returns&shippings">Return and Shipping poilcy</Link></p>
+    <p className="bg-gray-100 text-gray-600 text-sm text-center pb-3 pt-7">copyrignt&copy; 44saturnclothing 2025</p>
+    </>
+>>>>>>> 094bf57 (updated code and fixed issues)
   );
 };
 

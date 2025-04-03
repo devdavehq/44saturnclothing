@@ -4,6 +4,12 @@ import { FaBars } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { assets } from "../../../Images/assets";
+<<<<<<< HEAD
+=======
+import Swal from 'sweetalert2';
+import { get } from '../../api';
+
+>>>>>>> 094bf57 (updated code and fixed issues)
 
 const NavBar = () => {
     const navigate = useNavigate();
@@ -44,6 +50,63 @@ const NavBar = () => {
         };
     }, []);
 
+<<<<<<< HEAD
+=======
+
+
+    useEffect(() => {
+        const checkStockInterval = setInterval(async () => {
+          try {
+            // 1. Get current cart from localStorage
+            const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+            if (storedCart.length === 0) return;
+      
+            // 2. Fetch all products to get current stock
+            const response = await get('/display_products');
+            const products = response.data?.msg || [];
+            
+            // 3. Create stock lookup map (product_id -> stock_quantity)
+            const stockMap = {};
+            products.forEach(product => {
+              stockMap[product.product_id] = product.stock_quantity;
+            });
+      
+            // 4. Filter cart - remove items that either:
+            //    - Don't exist in stockMap (product deleted) OR
+            //    - Have stock_quantity <= 0
+            const updatedCart = storedCart.filter(item => {
+              // Check if product exists in stock data
+              if (!(item.product_id in stockMap)) {
+                return false; // Remove if product no longer exists
+              }
+              
+              // Check if product is out of stock
+              return stockMap[item.product_id] > 0;
+            });
+      
+            // 5. Update if changes were made
+            if (updatedCart.length !== storedCart.length) {
+              localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
+              window.dispatchEvent(new Event('cartUpdated'));
+              
+              Swal.fire({
+                icon: 'info',
+                title: 'Cart Updated',
+                text: 'Some items were removed as they are no longer available',
+                timer: 3000
+              });
+              location.href = '/'
+            }
+          } catch (error) {
+            console.error('Error checking stock:', error);
+          }
+        }, 3000); // Check every 3 seconds
+      
+        return () => clearInterval(checkStockInterval);
+      }, []);
+// console.log(cartItems);
+
+>>>>>>> 094bf57 (updated code and fixed issues)
     // Close cart when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {

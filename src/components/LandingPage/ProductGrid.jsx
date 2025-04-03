@@ -12,6 +12,7 @@ const ProductCard = () => {
   // Add this useEffect to listen for cart updates
   const cartInitializedRef = useRef(false);
 
+<<<<<<< HEAD
     // Ref for the cart drawer
 
     // Initialize cart items only once
@@ -43,6 +44,39 @@ const ProductCard = () => {
 
   // Add to cart function
   const addToCart = async (product_id, size, quantity, image, amount, name) => {
+=======
+  // Ref for the cart drawer
+
+  // Initialize cart items only once
+  useEffect(() => {
+    if (!cartInitializedRef.current) {
+      const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+      setCart(storedCart);
+      cartInitializedRef.current = true;
+    }
+  }, []);
+
+  // Listen for cart updates with a ref to prevent circular updates
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      // Use setTimeout to defer the state update to the next tick
+      // This breaks the circular dependency during render
+      setTimeout(() => {
+        const storedCart = JSON.parse(localStorage.getItem('cartMultiple')) || [];
+        setCart(storedCart);
+      }, 0);
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdate);
+    };
+  }, []);
+
+  // Add to cart function
+  const addToCart = async (product_id, size, quantity, image, amount, name, stockQuan) => {
+>>>>>>> 094bf57 (updated code and fixed issues)
     try {
       const existingItemIndex = cart.findIndex(
         item => item.product_id === product_id && item.size === size.toLowerCase()
@@ -51,12 +85,18 @@ const ProductCard = () => {
       setCart((prevCart) => {
         let updatedCart;
         if (existingItemIndex !== -1) {
+<<<<<<< HEAD
           updatedCart = prevCart.map((item, index) => 
             index === existingItemIndex 
+=======
+          updatedCart = prevCart.map((item, index) =>
+            index === existingItemIndex
+>>>>>>> 094bf57 (updated code and fixed issues)
               ? { ...item, quantity: item.quantity + quantity }
               : item
           ).filter(item => item.quantity > 0);
         } else {
+<<<<<<< HEAD
           updatedCart = [...prevCart, { 
             product_id, 
             size: size.toLowerCase(), 
@@ -64,6 +104,16 @@ const ProductCard = () => {
             image, 
             amount: amount * quantity,
             name 
+=======
+          updatedCart = [...prevCart, {
+            product_id,
+            size: size.toLowerCase(),
+            quantity,
+            image,
+            amount: amount * quantity,
+            name,
+            stockQuan: stockQuan
+>>>>>>> 094bf57 (updated code and fixed issues)
           }];
         }
         localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
@@ -154,7 +204,12 @@ const ProductCard = () => {
   return (
     <div className="container mx-auto py-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<<<<<<< HEAD
         {products.map((product) => (
+=======
+        {products.slice(0, 8).map((product) => (
+    
+>>>>>>> 094bf57 (updated code and fixed issues)
           <div key={product.id} className="relative cursor-pointer group">
             <motion.div
               className="relative"
@@ -183,6 +238,7 @@ const ProductCard = () => {
                 <p className="text-gray-600">
                   ₦{Math.max(...product.prices).toLocaleString()}
                 </p>
+<<<<<<< HEAD
                 <ShoppingCart
                   className="bg-black text-white p-1 rounded-sm absolute right-4 top-4 cursor-pointer"
                   onClick={() => {
@@ -194,6 +250,39 @@ const ProductCard = () => {
                     addToCart(product.product_id, product.sizes[0], 1, product.mainImage, Math.max(...product.prices), product.name);
                   }}
                 />
+=======
+                <button
+                  className={`p-1 rounded-sm absolute right-4 top-4 ${product.stock_quantity <= 0
+                      ? 'opacity-50 cursor-not-allowed bg-gray-300'
+                      : 'bg-black text-white cursor-pointer hover:bg-gray-800'
+                    }`}
+                  disabled={product.stock_quantity <= 0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (product.stock_quantity > 0) {
+                      const newQuantity = (quan[product.product_id] || 0) + 1;
+                      setQuan((prev) => ({
+                        ...prev,
+                        [product.product_id]: newQuantity,
+                      }));
+                      addToCart(
+                        product.product_id,
+                        product.sizes[0],
+                        1,
+                        product.mainImage,
+                        Math.max(...product.prices),
+                        product.name, product.stock_quantity
+                      );
+                    }
+                  }}
+                  aria-disabled={product.stock_quantity <= 0}
+                >
+                  <ShoppingCart
+                    className={`h-5 w-5 ${product.stock_quantity <= 0 ? 'text-gray-500' : 'text-white'
+                      }`}
+                  />
+                </button>
+>>>>>>> 094bf57 (updated code and fixed issues)
               </div>
             </motion.div>
           </div>

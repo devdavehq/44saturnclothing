@@ -467,7 +467,11 @@ const AddProduct = ({ onClose, currentProduct }) => {
           </div>
 
           <div>
+<<<<<<< HEAD
             <label className="block text-sm font-medium text-gray-700">Images: Max 2</label>
+=======
+            <label className="block text-sm font-medium text-gray-700">Images: Max 6</label>
+>>>>>>> 094bf57 (updated code and fixed issues)
             <input
               type="file"
               accept="image/*"

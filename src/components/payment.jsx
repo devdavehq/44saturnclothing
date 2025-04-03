@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { MdAccountBalance } from 'react-icons/md'; // Importing the bank icon from Material Design
+<<<<<<< HEAD
 import { ShoppingCart } from 'lucide-react';
+=======
+import { ShoppingCart, ChevronUp, ChevronDown } from 'lucide-react';
+>>>>>>> 094bf57 (updated code and fixed issues)
 import { get, post, put, del } from '../api';
 import Swal from 'sweetalert2';
 import { FaCreditCard, FaMoneyCheckAlt } from 'react-icons/fa';
@@ -18,6 +22,10 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
     const [referenceId, setReferenceId] = useState('');
     const [bankName, setBankName] = useState(''); // New state for bank name
     const [loading, setLoading] = useState(false); // New state for loader
+<<<<<<< HEAD
+=======
+    const [showSummary, setShowSummary] = useState(false); // New state for mobile summary toggle
+>>>>>>> 094bf57 (updated code and fixed issues)
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -132,11 +140,51 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
     };
 
     return (
+<<<<<<< HEAD
         <div className="flex flex-row mx-auto p-6 bg-white rounded-lg my-12">
             {/* Payment Form */}
             <div className="md:w-1/2 p-6">
                 <h1 className="text-[25px] font-bold mb-4 ml-[100px]">Checkout</h1>
                 <form onSubmit={handleSubmit} className='w-[70%] ml-[100px]'>
+=======
+        <div className="flex flex-col md:flex-row mx-auto p-6 bg-white rounded-lg my-12">
+            {/* mobile summary */}
+             <div className="block md:hidden">
+                <button 
+                    onClick={() => setShowSummary(!showSummary)}
+                    className="w-full flex justify-between items-center p-4 bg-gray-100 border-t border-b"
+                >
+                    <span className="font-bold">Order Summary</span>
+                    {showSummary ? <ChevronDown /> : <ChevronUp />}
+                </button>
+                {showSummary && (
+                    <div className="p-4 bg-gray-100">
+                        <div className="max-h-60 overflow-y-auto">
+                            {products.map((product, index) => (
+                                <div key={`${product.product_id}-${product.size}`} className="flex justify-between py-2 border-b">
+                                    <span>{product.name} ({product.size})</span>
+                                    <span>₦{product.amount} x {product.quantity}</span>
+                                    <button
+                                        onClick={() => removeFromCart(product.product_id, product.size)}
+                                        className="text-red-500 hover:text-red-700"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-between py-2 font-bold">
+                            <span>Total</span>
+                            <span>₦{totalAmount.toLocaleString()}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+            {/* Payment Form */}
+            <div className="w-full md:w-1/2 p-6">
+                <h1 className="text-[25px] font-bold mb-4 md:ml-[100px]">Checkout</h1>
+                <form onSubmit={handleSubmit} className='w-full md:w-[70%] md:ml-[100px]'>
+>>>>>>> 094bf57 (updated code and fixed issues)
                     {error && <div className="mt-4 text-red-500 w-[70%]">{error}</div>}
                     {success && <div className="mt-4 text-green-500 w-[70%]">{success}</div>}
                     <div className="mb-4">
@@ -202,8 +250,14 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                 </form>
             </div>
 
+<<<<<<< HEAD
             {/* Order Summary */}
             <div className="md:w-1/2 p-6 bg-gray-100 border-l">
+=======
+           
+            {/* Order Summary */}
+            <div className="hidden md:block md:w-1/2 p-6 bg-gray-100 border-l">
+>>>>>>> 094bf57 (updated code and fixed issues)
                 <h2 className="text-xl font-bold">Order Summary</h2>
                 <div className="max-h-60 overflow-y-auto">
                     {products.map((product, index) => (
