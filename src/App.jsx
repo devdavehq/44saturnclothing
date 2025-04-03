@@ -11,6 +11,8 @@ import ProductPage from './pages/ProductPage';
 import ResetPassword from './pages/admin/reset-password';
 import ResetPasswordToken from './pages/admin/reset-password-token';
 import Page404 from './pages/404';
+import Returns from './pages/returns_shippings';
+
 
 function App() {
   return (
@@ -26,7 +28,10 @@ function App() {
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/reset-password" element={<ResetPassword />} />
         <Route path="/admin/reset-password/:token" element={<ResetPasswordToken />} />
+        <Route path="*" element={<Page404 />} />
+        <Route path="/returns&shippings" element={<Returns />} />
         <Route path="/product/:productName" element={<ProductPage />} />
+
         <Route path="*" element={<Page404 />} />
       </Routes>
     </Router>

@@ -4,12 +4,10 @@ import { FaBars } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { assets } from "../../../Images/assets";
-<<<<<<< HEAD
-=======
+
 import Swal from 'sweetalert2';
 import { get } from '../../api';
 
->>>>>>> 094bf57 (updated code and fixed issues)
 
 const NavBar = () => {
     const navigate = useNavigate();
@@ -50,8 +48,7 @@ const NavBar = () => {
         };
     }, []);
 
-<<<<<<< HEAD
-=======
+
 
 
     useEffect(() => {
@@ -106,7 +103,6 @@ const NavBar = () => {
       }, []);
 // console.log(cartItems);
 
->>>>>>> 094bf57 (updated code and fixed issues)
     // Close cart when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {

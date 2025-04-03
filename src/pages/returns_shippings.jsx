@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import NavBar from '../components/LandingPage/NavBar'
 import { assets } from '../../Images/assets'

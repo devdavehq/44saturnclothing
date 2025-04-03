@@ -5,20 +5,15 @@ import NavBar from '../components/LandingPage/NavBar';
 import { get, post } from '../api';
 
 const ProductPage = () => {
-<<<<<<< HEAD
-    const [selectedSize, setSelectedSize] = useState("SM");
-=======
+
     const [selectedSize, setSelectedSize] = useState("");
->>>>>>> 094bf57 (updated code and fixed issues)
     const [mainProduct, setMainProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-<<<<<<< HEAD
-=======
+
     const [sizeerror, setSizeError] = useState(null);
 
->>>>>>> 094bf57 (updated code and fixed issues)
     const [selectedImage, setSelectedImage] = useState(null);
     const [quan, setQuan] = useState({}); // Track quantity for each product
     const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cartMultiple')) || []);
@@ -52,62 +47,34 @@ const ProductPage = () => {
         };
 
         window.addEventListener('cartUpdated', handleCartUpdate);
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 094bf57 (updated code and fixed issues)
+
         return () => {
             window.removeEventListener('cartUpdated', handleCartUpdate);
         };
     }, []);
 
     // Add to cart function
-<<<<<<< HEAD
-    const addToCart = async (product_id, size, quantity, image, amount, name) => {
-=======
+
     const addToCart = async (product_id, size, quantity, image, amount, name, stockQuan) => {
->>>>>>> 094bf57 (updated code and fixed issues)
         try {
             const existingItemIndex = cart.findIndex(
                 item => item.product_id === product_id && item.size === size.toLowerCase()
             );
-<<<<<<< HEAD
 
-            const updatedCart = [...cart];
-            
-=======
             setSizeError('')
             if (size === '') {
                 return setSizeError('Please select size')
             }
             const updatedCart = [...cart];
 
->>>>>>> 094bf57 (updated code and fixed issues)
             if (existingItemIndex !== -1) {
                 updatedCart[existingItemIndex] = {
                     ...updatedCart[existingItemIndex],
                     quantity: updatedCart[existingItemIndex].quantity + quantity
                 };
             } else {
-<<<<<<< HEAD
-                updatedCart.push({ 
-                    product_id, 
-                    size: size.toLowerCase(), 
-                    quantity, 
-                    image, 
-                    amount: amount * quantity,
-                    name 
-                });
-            }
-            
-            // Update localStorage first
-            localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
-            
-            // Then update state
-            setCart(updatedCart);
-            
-=======
+
                 updatedCart.push({
                     product_id,
                     size: size.toLowerCase(),
@@ -125,7 +92,6 @@ const ProductPage = () => {
             // Then update state
             setCart(updatedCart);
 
->>>>>>> 094bf57 (updated code and fixed issues)
             // Dispatch event after state is updated
             setTimeout(() => {
                 window.dispatchEvent(new Event('cartUpdated'));
@@ -217,42 +183,26 @@ const ProductPage = () => {
     return (
         <>
             <NavBar />
-<<<<<<< HEAD
-            <div className="max-w-6xl mx-auto p-6 mt-[100px]">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    {/* Side Product Images */}
-                    <div className="space-y-4">
-                        <motion.div className="h-[500px] overflow-hidden rounded-lg">
-=======
             <div className="max-w-6xl mx-auto p-4 md:p-6 mt-[80px] md:mt-[100px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                     {/* Side Product Images */}
                     <div className="space-y-3 md:space-y-4">
                         <motion.div className="h-[300px] md:h-[500px] overflow-hidden rounded-lg">
->>>>>>> 094bf57 (updated code and fixed issues)
                             <img
                                 src={`${import.meta.env.VITE_SERVER_URL}/${selectedImage}`}
                                 alt={mainProduct.name}
                                 className="w-full h-full object-cover object-center"
                             />
                         </motion.div>
-<<<<<<< HEAD
-                        {/* Thumbnail Images */}
-                        <div className="flex space-x-2 overflow-x-auto">
-=======
                         {/* Thumbnail Images - Horizontal scroll on mobile */}
                         <div className="flex space-x-2 overflow-x-auto pb-2">
->>>>>>> 094bf57 (updated code and fixed issues)
                             {mainProduct.images.map((image, index) => (
                                 <img
                                     key={index}
                                     src={`${import.meta.env.VITE_SERVER_URL}/${image}`}
                                     alt={`${mainProduct.name} view ${index + 1}`}
-<<<<<<< HEAD
-                                    className="h-20 w-20 object-cover cursor-pointer rounded-md"
-=======
+
                                     className="h-16 w-16 md:h-20 md:w-20 object-cover cursor-pointer rounded-md"
->>>>>>> 094bf57 (updated code and fixed issues)
                                     onClick={() => setSelectedImage(image)}
                                 />
                             ))}
@@ -260,15 +210,9 @@ const ProductPage = () => {
                     </div>
 
                     {/* Product Details */}
-<<<<<<< HEAD
-                    <div>
-                        <div className="mb-6">
-                            <motion.div className="h-[300px] overflow-hidden rounded-lg object-cover object-center">
-=======
                     <div className="md:sticky md:top-[100px] md:self-start">
                         <div className="mb-4 md:mb-6">
                             <motion.div className="h-[200px] md:h-[300px] overflow-hidden rounded-lg object-cover object-center">
->>>>>>> 094bf57 (updated code and fixed issues)
                                 <img
                                     src={`${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`}
                                     alt={mainProduct.name}
@@ -277,18 +221,6 @@ const ProductPage = () => {
                             </motion.div>
                         </div>
 
-<<<<<<< HEAD
-                        <h1 className="text-2xl font-bold">{mainProduct.name}</h1>
-                        <p className="text-xl text-gray-500 my-2">
-                            {parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price ||
-                                parsedPriceSize[0]?.price || '0'} NGN
-                        </p>
-                        <div className="flex space-x-2 my-4">
-                            {parsedSizes.map((size) => (
-                                <button
-                                    key={size}
-                                    className={`px-4 py-2 border ${selectedSize.toLowerCase() === size ? "bg-black text-white" : "bg-white text-black"
-=======
                         <h1 className="text-xl md:text-2xl font-bold">{mainProduct.name}</h1>
                         <p className="text-lg md:text-xl text-gray-500 my-2">
                             {parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price ||
@@ -306,7 +238,6 @@ const ProductPage = () => {
                                     className={`px-3 py-1 md:px-4 md:py-2 border text-sm md:text-base ${selectedSize.toLowerCase() === size
                                             ? "bg-black text-white"
                                             : "bg-white text-black"
->>>>>>> 094bf57 (updated code and fixed issues)
                                         }`}
                                     onClick={() => setSelectedSize(size)}
                                 >
@@ -314,29 +245,7 @@ const ProductPage = () => {
                                 </button>
                             ))}
                         </div>
-<<<<<<< HEAD
-                        <p className="text-gray-600 my-4">{mainProduct.description}</p>
-                        <button className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-600"
-                            onClick={() => {
-                                const newQuantity = (quan[mainProduct.product_id] || 0) + 1;
-                                setQuan((prev) => ({
-                                    ...prev,
-                                    [mainProduct.product_id]: newQuantity,
-                                }));
-                                addToCart(mainProduct.product_id, selectedSize.toLowerCase(), 1, `${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`, parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price, mainProduct.name);
-                            }}
-                        >
-                            Add to Cart
-                        </button>
-                        <button className="w-full mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-300"
-                            onClick={() => {
-                                addToCart(mainProduct.product_id, selectedSize.toLowerCase(), 1, `${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`, parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price, mainProduct.name);
-                                navigate(`/product/checkout/${mainProduct.product_id}`);
-                            }}
-                        >
-                            Buy It Now
-                        </button>
-=======
+
 
                         <p className="text-gray-600 my-3 md:my-4 text-sm md:text-base">
                             {mainProduct.description}
@@ -396,27 +305,12 @@ const ProductPage = () => {
                                 {mainProduct.stock_quantity <= 0 ? 'Unavailable' : 'Buy It Now'}
                             </button>
                         </div>
->>>>>>> 094bf57 (updated code and fixed issues)
                     </div>
                 </div>
 
                 {/* Related Products */}
                 {Array.isArray(relatedProducts) && relatedProducts.length > 0 && (
-<<<<<<< HEAD
-                    <>
-                        <h2 className="text-xl font-bold mt-12">Related Products</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                            {relatedProducts.map((product) => (
-                                <div key={product.product_id} className="border rounded-lg overflow-hidden shadow-lg">
-                                    <img
-                                        src={`${import.meta.env.VITE_SERVER_URL}/${product.hoverImage}`}
-                                        alt={product.name}
-                                        className="w-full h-48 object-cover"
-                                    />
-                                    <div className="p-4">
-                                        <h3 className="text-lg font-semibold">{product.name}</h3>
-                                        <p className="text-gray-500">
-=======
+
                     <div className="mt-8 md:mt-12">
                         <h2 className="text-lg md:text-xl font-bold">Related Products</h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 mt-3 md:mt-4">
@@ -434,26 +328,19 @@ const ProductPage = () => {
                                     <div className="p-2 md:p-4">
                                         <h3 className="text-sm md:text-lg font-semibold line-clamp-1">{product.name}</h3>
                                         <p className="text-gray-500 text-xs md:text-base">
->>>>>>> 094bf57 (updated code and fixed issues)
                                             {JSON.parse(product.price_size)[0]?.price || '0'} NGN
                                         </p>
                                     </div>
                                 </div>
                             ))}
                         </div>
-<<<<<<< HEAD
-                    </>
-=======
+
                     </div>
->>>>>>> 094bf57 (updated code and fixed issues)
                 )}
             </div>
         </>
     );
-<<<<<<< HEAD
-=======
 
->>>>>>> 094bf57 (updated code and fixed issues)
 };
 
 export default ProductPage;

@@ -25,11 +25,8 @@ const ResetPasswordToken = () => {
         token
       });
   
-<<<<<<< HEAD
-      console.log('API Response:', { data, error }); // Log the response
-=======
+
       // console.log('API Response:', { data, error }); // Log the response
->>>>>>> 094bf57 (updated code and fixed issues)
   
       if (data) {
         setSuccessMessage('Password reset successfully! Redirecting to login page...');
