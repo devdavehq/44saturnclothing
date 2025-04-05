@@ -230,7 +230,7 @@ const ShopPage = () => {
                         {filteredItems.map((item) => (
                             <motion.div
                                 key={item.product_id}
-                                className="border rounded-lg shadow-md p-4 bg-white flex flex-col relative overflow-hidden pb-7 hover:shadow-lg transition-shadow duration-300"
+                                className="border rounded-lg shadow-md p-4 bg-white cursor-pointer flex flex-col relative overflow-hidden pb-7 hover:shadow-lg transition-shadow duration-300"
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 transition={{ duration: 0.2, delay: item.id * 0.1 }}
