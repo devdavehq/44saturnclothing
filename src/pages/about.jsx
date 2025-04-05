@@ -29,11 +29,21 @@ const About = () => {
     <div>
       <NavBar />
       {/* <img src={`{${img || assets.img}}`} alt="no img here" /> */}
-      <img
-        src={img || assets.background}
-        alt="no img here"
-        className="mt-[65px] bg-slate-600 h-96 object-cover object-center w-full"
-      />      
+      <div className="relative min-h-[100vh] mt-[65px]"> {/* Increased height */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${img || assets.background})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#1e293b',
+            backgroundAttachment: 'fixed'
+          }}
+        >
+        </div>
+
+      </div>
       <div className="py-7">
         <h1 className="text-center text-4xl font-bold">About</h1>
         <div className='w-[50%] h-[1.3px] bg-slate-700' style={{ margin: "20px auto" }}></div>

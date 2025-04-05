@@ -32,7 +32,9 @@ const Settings = () => {
 
     const handleWebSubmit = async (e) => {
         e.preventDefault();
-    
+        setFile1('')
+        setFile2('')
+        
         if (!file1 || !file2) {
             return Swal.fire({
                 title: 'Error!',
@@ -77,7 +79,9 @@ const Settings = () => {
 
     const handleAdminSubmit = async (e) => {
         e.preventDefault();
-
+        
+        setEmail('')
+        setPassword('')
         if(!email || !password) return setErrors('Please fill in email or password')
         const res = await put('/admin-details', { email, password })
 

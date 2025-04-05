@@ -107,7 +107,7 @@ const ShopPage = () => {
     }, [processProductData]);
 
     // Add to cart function
-    const addToCart = async (product_id, size, quantity, image, amount, name) => {
+    const addToCart = async (product_id, size, quantity, image, amount, name, stockQuan) => {
         try {
             const existingItemIndex = cart.findIndex(
                 item => item.product_id === product_id && item.size === size.toLowerCase()
@@ -127,7 +127,8 @@ const ShopPage = () => {
                     quantity, 
                     image, 
                     amount: amount * quantity,
-                    name 
+                    name,
+                    stockQuan: stockQuan 
                 });
             }
             
@@ -219,56 +220,69 @@ const ShopPage = () => {
                         transition={{ duration: 0.5 }}
                     >
                         {filteredItems.map((item) => (
-                            <motion.div
-                                key={item.product_id}
-                                className="border rounded-lg shadow-md p-4 bg-white flex flex-col relative overflow-hidden pb-7 hover:shadow-lg transition-shadow duration-300"
-                                initial={{ y: 20, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                transition={{ duration: 0.2, delay: item.id * 0.1 }}
-                                whileHover={{ scale: 1.05 }}
-                            >
-                                <div className="relative w-full h-64"> {/* Fixed height for image container */}
-                                    {item.stock_quantity <= 0 && (
-                                        <div className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded-md">Sold Out</div>
-                                    )}
-                                    <motion.img
-                                        src={item.mainImage}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover rounded-lg"
-                                        initial={{ opacity: 1 }}
-                                        whileHover={{ opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    />
-                                    <motion.img
-                                        src={item.hoverImage}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover rounded-lg absolute top-0 left-0"
-                                        initial={{ opacity: 0 }}
-                                        whileHover={{ opacity: 1 }}
-                                        transition={{ duration: 0.3 }}
-                                    />
-                                </div>
-                                <div className="mt-4 flex flex-col items-start relative">
-                                    <Link
-                                        to={`/product/${item.name}`}
-                                        className="font-semibold text-black hover:underline"
-                                    >
-                                        {item.name}
-                                    </Link>
-                                    <p className="text-gray-500">{getLargestPrice(item.prices)}</p>
-                                    <ShoppingCart 
-                                        className='bg-black text-white p-1 w-7 h-7 rounded-sm absolute right-4 top-2 cursor-pointer'
-                                        onClick={() => {
-                                            const newQuantity = (quantities[item.product_id] || 0) + 1;
-                                            setQuantities(prev => ({
-                                                ...prev,
-                                                [item.product_id]: newQuantity,
-                                            }));
-                                            addToCart(item.product_id, item.sizes[0], 1, item.mainImage, Math.max(...item.prices), item.name);
-                                        }}
-                                    />
-                                </div>
-                            </motion.div>
+                         <motion.div
+                         key={item.product_id}
+                         className="border rounded-lg shadow-md p-4 bg-white flex flex-col relative overflow-hidden pb-7 hover:shadow-lg transition-shadow duration-300"
+                         initial={{ y: 20, opacity: 0 }}
+                         animate={{ y: 0, opacity: 1 }}
+                         transition={{ duration: 0.2, delay: item.id * 0.1 }}
+                         whileHover={{ scale: 1.05 }}
+                       >
+                         {/* Improved image container with proper sizing */}
+                         <div className="relative w-full h-72 md:h-80"> {/* Increased height for better image display */}
+                           {item.stock_quantity <= 0 && (
+                             <div className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded-md z-10">Sold Out</div>
+                           )}
+                           <motion.img
+                             src={item.mainImage}
+                             alt={item.name}
+                             className="w-full h-full object-contain rounded-lg" 
+                             initial={{ opacity: 1 }}
+                             whileHover={{ opacity: 0 }}
+                             transition={{ duration: 0.3 }}
+                           />
+                           <motion.img
+                             src={item.hoverImage}
+                             alt={item.name}
+                             className="w-full h-full object-contain rounded-lg absolute top-0 left-0" 
+                             initial={{ opacity: 0 }}
+                             whileHover={{ opacity: 1 }}
+                             transition={{ duration: 0.3 }}
+                           />
+                         </div>
+                         
+                         {/* Product info with proper linking */}
+                         <div className="mt-4 flex flex-col items-start relative">
+                           <Link
+                             to={`/product/${encodeURIComponent(item.name)}`} 
+                             className="font-semibold text-black hover:underline w-full truncate" 
+                             title={item.name} 
+                           >
+                             {item.name}
+                           </Link>
+                           <p className="text-gray-500">{getLargestPrice(item.prices)}</p>
+                           <ShoppingCart 
+                             className='bg-black text-white p-1 w-7 h-7 rounded-sm absolute right-4 top-2 cursor-pointer hover:bg-gray-700 transition-colors'
+                             onClick={() => {
+                               const newQuantity = (quantities[item.product_id] || 0) + 1;
+                               setQuantities(prev => ({
+                                 ...prev,
+                                 [item.product_id]: newQuantity,
+                               }));
+                               // Ensure size is lowercase when adding to cart
+                               addToCart(
+                                 item.product_id, 
+                                 item.sizes[0].toLowerCase(), 
+                                 1, 
+                                 item.mainImage, 
+                                 Math.max(...item.prices), 
+                                 item.name,
+                                 item.stock_quantity
+                               );
+                             }}
+                           />
+                         </div>
+                       </motion.div>
                         ))}
                     </motion.div>
                 )}
