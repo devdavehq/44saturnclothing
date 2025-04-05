@@ -92,7 +92,9 @@ const NavBar = () => {
                 text: 'Some items were removed as they are no longer available',
                 timer: 3000
               });
-              location.href = '/'
+              setTimeout(function() {
+               location.href = '/'
+              }, 7000);
             }
           } catch (error) {
             console.error('Error checking stock:', error);

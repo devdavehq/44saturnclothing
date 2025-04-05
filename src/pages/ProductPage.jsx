@@ -297,7 +297,10 @@ const ProductPage = () => {
                                             parsedPriceSize.find(p => p.size.toLowerCase() === selectedSize.toLowerCase())?.price,
                                             mainProduct.name, mainProduct.stock_quantity
                                         );
-                                        navigate(`/product/checkout/${mainProduct.product_id}`);
+                                        if (selectedSize === '') {
+                                            sizeerror('Please select a size');
+                                        }
+                                        location.href = `/product/checkout/${mainProduct.product_id}`
                                     }
                                 }}
                                 disabled={mainProduct.stock_quantity <= 0}

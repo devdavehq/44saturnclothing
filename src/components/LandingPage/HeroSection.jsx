@@ -30,7 +30,7 @@ const HeroSection = () => {
       style={{
         backgroundImage: `url(${img || '../../../Images/background.jpg'})`,
         backgroundSize: 'cover', // Keeps your original styling
-        backgroundPosition: 'center top 30%',
+        backgroundPosition: 'center 30%',
         backgroundRepeat: 'no-repeat',
         backgroundColor: '#1e293b',
         backgroundAttachment: 'fixed' // Keeps parallax effect

@@ -27,21 +27,21 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
         setError(null);
         setSuccess(null);
         setLoading(true);
-    
+
         try {
             // Validate inputs
             if (products.length === 0) {
                 throw new Error('Your cart is empty');
             }
-    
+
             const trimmedEmail = email.trim();
             const trimmedPhone = phone.trim();
             const trimmedShippingAddress = shippingAddress.trim();
-    
+
             if (!trimmedEmail || !trimmedPhone || !trimmedShippingAddress) {
                 throw new Error('Please fill in all required fields');
             }
-    
+
             // Prepare form data
             const formData = new FormData();
             formData.append('email', trimmedEmail);
@@ -49,73 +49,86 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
             formData.append('address', trimmedShippingAddress);
             formData.append('total_amount', totalAmount);
             formData.append('products', JSON.stringify(products));
-            
+
             if (paymentMethod === 'bank' && bankName.trim()) {
                 formData.append('bank_name', bankName.trim());
             }
-    
+
             // Make API call
             const response = await post('/create-bank-order', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-    
+
             // Handle response
+            if (!response || !response.data) {
+                throw new Error('Empty response from server');
+            }
+
             if (response.data && response.data.status === 'success') {
-                setSuccess(response.data.message);
+                const emailNotice = response.data.email_sent
+                    ? 'Check your email for payment details.'
+                    : 'If Email not sent - please contact support with your reference number.';
+                console.log(response);
+                
+                setSuccess(`Order placed. ${emailNotice}`);
+
                 if (response.data.ref) {
                     setShowReferenceForm(true);
                 }
+
+            } else if (response.data.status === 'error') {
+                throw new Error(response.data.message);
             } else {
-                throw new Error(response.data?.message || 'Unexpected response from server');
+                throw new Error('Unexpected response format');
             }
-    
+
         } catch (error) {
             setError(error.message || 'Error processing payment');
         } finally {
             setLoading(false);
         }
     };
-    
+
     const handleReferenceSubmit = async (event) => {
         event.preventDefault();
         setRefError(null);
         setLoading(true);
-    
+
         try {
             if (paymentMethod === 'bank' && !referenceId.trim()) {
                 throw new Error('Please enter your reference ID');
             }
-    
+
             const formData = new FormData();
             formData.append('reference_id', referenceId.trim());
             formData.append('totalAmount', totalAmount);
-    
+
             const response = await post('/verify-reference', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-    
+
             if (response.data?.status !== 'success') {
                 throw new Error(response.data?.message || 'Payment verification failed');
             }
-    
+
             // Success case
             Swal.fire({
                 icon: 'success',
                 title: 'Payment Verified',
                 text: response.data.message,
             });
-    
+
             // Clear cart
             products.forEach((product) => {
                 removeFromCart(product.product_id, product.size);
             });
             localStorage.removeItem('cartMultiple');
             setShowReferenceForm(false);
-    
+
         } catch (error) {
             setRefError(error.message);
         } finally {
@@ -127,8 +140,8 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
 
         <div className="flex flex-col md:flex-row mx-auto p-6 bg-white rounded-lg my-12">
             {/* mobile summary */}
-             <div className="block md:hidden">
-                <button 
+            <div className="block md:hidden">
+                <button
                     onClick={() => setShowSummary(!showSummary)}
                     className="w-full flex justify-between items-center p-4 bg-gray-100 border-t border-b"
                 >
@@ -210,7 +223,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                             disabled={paymentMethod !== 'bank'} // Disable if payment method is not "bank"
                         />
                     </div>
-                    
+
                     <div className="flex items-center mb-4">
                         <input
                             type="checkbox"
@@ -228,7 +241,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
             </div>
 
 
-           
+
             {/* Order Summary */}
             <div className="hidden md:block md:w-1/2 p-6 bg-gray-100 border-l">
                 <h2 className="text-xl font-bold">Order Summary</h2>
@@ -257,7 +270,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
                         <h2 className="text-2xl font-bold mb-6 text-gray-800">Verify Payment</h2>
-                    {refError && <div className="mt-4 text-red-500 w-[70%]">{refError ? refError : ''}</div>}
+                        {refError && <div className="mt-4 text-red-500 w-[70%]">{refError ? refError : ''}</div>}
                         <form onSubmit={handleReferenceSubmit}>
                             <div className="mb-6">
                                 <label className="block text-gray-700 text-sm font-medium mb-2">

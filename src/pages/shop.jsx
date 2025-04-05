@@ -80,11 +80,11 @@ const ShopPage = () => {
                 if (res.data) {
                     // Process products in batches for better performance
                     const batchSize = 10;
-                    
+
                     for (let i = 0; i < res.data.msg.length; i += batchSize) {
                         const batch = res.data.msg.slice(i, i + batchSize);
                         const processedBatch = batch.map(processProductData);
-                        
+
                         if (isMounted) {
                             setProducts(prev => [...prev, ...processedBatch]);
                             if (i === 0) setLoading(false); // Show first batch immediately
@@ -114,30 +114,30 @@ const ShopPage = () => {
             );
 
             const updatedCart = [...cart];
-            
+
             if (existingItemIndex !== -1) {
                 updatedCart[existingItemIndex] = {
                     ...updatedCart[existingItemIndex],
                     quantity: updatedCart[existingItemIndex].quantity + quantity
                 };
             } else {
-                updatedCart.push({ 
-                    product_id, 
-                    size: size.toLowerCase(), 
-                    quantity, 
-                    image, 
+                updatedCart.push({
+                    product_id,
+                    size: size.toLowerCase(),
+                    quantity,
+                    image,
                     amount: amount * quantity,
                     name,
-                    stockQuan: stockQuan 
+                    stockQuan: stockQuan
                 });
             }
-            
+
             // Update localStorage first
             localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
-            
+
             // Then update state
             setCart(updatedCart);
-            
+
             // Dispatch event after state is updated
             setTimeout(() => {
                 window.dispatchEvent(new Event('cartUpdated'));
@@ -162,12 +162,20 @@ const ShopPage = () => {
     };
 
     // Filter products based on search term and filter
-    const filteredItems = products.filter(
-        (item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (filter === "all" || item.status === filter)
-    );
+    const filteredItems = products.filter((item) => {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
 
+        if (filter === "all") return matchesSearch;
+        if (filter === "sold out") return matchesSearch && item.stock_quantity <= 0;
+        if (filter === "recent") {
+            // Assuming items have a created_at field in the database
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            const itemDate = new Date(item.created_at);
+            return matchesSearch && itemDate >= oneMonthAgo;
+        }
+        return matchesSearch;
+    });
     // Function to get the largest price from the prices array
     const getLargestPrice = (prices) => {
         if (!prices || prices.length === 0) return "N/A";
@@ -220,69 +228,75 @@ const ShopPage = () => {
                         transition={{ duration: 0.5 }}
                     >
                         {filteredItems.map((item) => (
-                         <motion.div
-                         key={item.product_id}
-                         className="border rounded-lg shadow-md p-4 bg-white flex flex-col relative overflow-hidden pb-7 hover:shadow-lg transition-shadow duration-300"
-                         initial={{ y: 20, opacity: 0 }}
-                         animate={{ y: 0, opacity: 1 }}
-                         transition={{ duration: 0.2, delay: item.id * 0.1 }}
-                         whileHover={{ scale: 1.05 }}
-                       >
-                         {/* Improved image container with proper sizing */}
-                         <div className="relative w-full h-72 md:h-80"> {/* Increased height for better image display */}
-                           {item.stock_quantity <= 0 && (
-                             <div className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded-md z-10">Sold Out</div>
-                           )}
-                           <motion.img
-                             src={item.mainImage}
-                             alt={item.name}
-                             className="w-full h-full object-contain rounded-lg" 
-                             initial={{ opacity: 1 }}
-                             whileHover={{ opacity: 0 }}
-                             transition={{ duration: 0.3 }}
-                           />
-                           <motion.img
-                             src={item.hoverImage}
-                             alt={item.name}
-                             className="w-full h-full object-contain rounded-lg absolute top-0 left-0" 
-                             initial={{ opacity: 0 }}
-                             whileHover={{ opacity: 1 }}
-                             transition={{ duration: 0.3 }}
-                           />
-                         </div>
-                         
-                         {/* Product info with proper linking */}
-                         <div className="mt-4 flex flex-col items-start relative">
-                           <Link
-                             to={`/product/${encodeURIComponent(item.name)}`} 
-                             className="font-semibold text-black hover:underline w-full truncate" 
-                             title={item.name} 
-                           >
-                             {item.name}
-                           </Link>
-                           <p className="text-gray-500">{getLargestPrice(item.prices)}</p>
-                           <ShoppingCart 
-                             className='bg-black text-white p-1 w-7 h-7 rounded-sm absolute right-4 top-2 cursor-pointer hover:bg-gray-700 transition-colors'
-                             onClick={() => {
-                               const newQuantity = (quantities[item.product_id] || 0) + 1;
-                               setQuantities(prev => ({
-                                 ...prev,
-                                 [item.product_id]: newQuantity,
-                               }));
-                               // Ensure size is lowercase when adding to cart
-                               addToCart(
-                                 item.product_id, 
-                                 item.sizes[0].toLowerCase(), 
-                                 1, 
-                                 item.mainImage, 
-                                 Math.max(...item.prices), 
-                                 item.name,
-                                 item.stock_quantity
-                               );
-                             }}
-                           />
-                         </div>
-                       </motion.div>
+                            <motion.div
+                                key={item.product_id}
+                                className="border rounded-lg shadow-md p-4 bg-white flex flex-col relative overflow-hidden pb-7 hover:shadow-lg transition-shadow duration-300"
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.2, delay: item.id * 0.1 }}
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                {/* Improved image container with proper sizing */}
+                                <div className="relative w-full h-72 md:h-80"> {/* Increased height for better image display */}
+                                    {item.stock_quantity <= 0 && (
+                                        <div className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded-md z-10">Sold Out</div>
+                                    )}
+                                    <motion.img
+                                        src={item.mainImage}
+                                        alt={item.name}
+                                        className="w-full h-full object-contain rounded-lg"
+                                        initial={{ opacity: 1 }}
+                                        whileHover={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    />
+                                    <motion.img
+                                        src={item.hoverImage}
+                                        alt={item.name}
+                                        className="w-full h-full object-contain rounded-lg absolute top-0 left-0"
+                                        initial={{ opacity: 0 }}
+                                        whileHover={{ opacity: 1 }}
+                                        transition={{ duration: 0.3 }}
+                                    />
+                                </div>
+
+                                {/* Product info with proper linking */}
+                                <div className="mt-4 flex flex-col items-start relative">
+                                    <Link
+                                        to={`/product/${encodeURIComponent(item.name)}`}
+                                        className="font-semibold text-black hover:underline w-full truncate"
+                                        title={item.name}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                    <p className="text-gray-500">{getLargestPrice(item.prices)}</p>
+                                    <button
+                                        className={`p-1 rounded-sm absolute right-4 top-4 ${item.stock_quantity <= 0
+                                            ? 'opacity-50 cursor-not-allowed bg-gray-300'
+                                            : 'bg-black text-white cursor-pointer hover:bg-gray-800'
+                                            }`}>
+                                        <ShoppingCart
+                                            className={`h-5 w-5 ${item.stock_quantity <= 0 ? 'text-gray-500' : 'text-white'}`}
+                                            onClick={() => {
+                                                const newQuantity = (quantities[item.product_id] || 0) + 1;
+                                                setQuantities(prev => ({
+                                                    ...prev,
+                                                    [item.product_id]: newQuantity,
+                                                }));
+                                                // Ensure size is lowercase when adding to cart
+                                                addToCart(
+                                                    item.product_id,
+                                                    item.sizes[0].toLowerCase(),
+                                                    1,
+                                                    item.mainImage,
+                                                    Math.max(...item.prices),
+                                                    item.name,
+                                                    item.stock_quantity
+                                                );
+                                            }}
+                                        />
+                                    </button>
+                                </div>
+                            </motion.div>
                         ))}
                     </motion.div>
                 )}

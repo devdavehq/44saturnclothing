@@ -143,7 +143,17 @@ const Products = () => {
       { header: "Stock", accessorKey: "stock_quantity" },
       { header: "Size", accessorKey: "sizes" },
       { header: "Category", accessorKey: "category" },
-      { header: "Description", accessorKey: "description" },
+      {
+        header: "Description",
+        accessorKey: "description",
+        cell: ({ row }) => {
+          const desc = row.original.description || "";
+          const maxLength = 50; // set your desired max length here
+          return desc.length > maxLength
+            ? desc.slice(0, maxLength) + "..."
+            : desc;
+        },
+      },
       {
         header: "Image",
         accessorKey: "imgUrl",
