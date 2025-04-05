@@ -22,7 +22,7 @@ const Login = () => {
             const res = await post('/login', formData);
             const { data, error, isLoading } = res;
     
-            console.log(res);
+            // console.log(res);
             
             if (data) {
                 if (data.message === 'Login successful') {

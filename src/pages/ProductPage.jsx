@@ -178,7 +178,7 @@ const ProductPage = () => {
 
     // Parse the price_size string into an object
     const parsedPriceSize = JSON.parse(mainProduct.price_size || '[]');
-    const parsedSizes = parsedPriceSize.map(item => item.size);
+    const parsedSizes = parsedPriceSize.map(item => item.size.toString().toLowerCase());
 
     return (
         <>
@@ -187,11 +187,11 @@ const ProductPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                     {/* Side Product Images */}
                     <div className="space-y-3 md:space-y-4">
-                        <motion.div className="h-[300px] md:h-[500px] overflow-hidden rounded-lg">
+                        <motion.div className="h-[400px] md:h-[500px] overflow-hidden rounded-lg">
                             <img
                                 src={`${import.meta.env.VITE_SERVER_URL}/${selectedImage}`}
                                 alt={mainProduct.name}
-                                className="w-full h-full object-cover object-center"
+                                className="w-full h-full object-contain object-center" // Changed to object-contain
                             />
                         </motion.div>
                         {/* Thumbnail Images - Horizontal scroll on mobile */}
@@ -212,11 +212,11 @@ const ProductPage = () => {
                     {/* Product Details */}
                     <div className="md:sticky md:top-[100px] md:self-start">
                         <div className="mb-4 md:mb-6">
-                            <motion.div className="h-[200px] md:h-[300px] overflow-hidden rounded-lg object-cover object-center">
+                            <motion.div className="h-[400px] md:h-[500px] overflow-hidden rounded-lg flex items-center justify-center bg-gray-50">
                                 <img
                                     src={`${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`}
                                     alt={mainProduct.name}
-                                    className="w-full h-full object-cover object-center"
+                                    className="max-w-full max-h-full object-contain"  // Changed to object-contain
                                 />
                             </motion.div>
                         </div>
@@ -235,13 +235,13 @@ const ProductPage = () => {
                             {parsedSizes.map((size) => (
                                 <button
                                     key={size}
-                                    className={`px-3 py-1 md:px-4 md:py-2 border text-sm md:text-base ${selectedSize.toLowerCase() === size
+                                    className={`px-3 py-1 md:px-4 md:py-2 border text-sm md:text-base ${selectedSize.toLowerCase() === size.toLowerCase()
                                             ? "bg-black text-white"
                                             : "bg-white text-black"
                                         }`}
                                     onClick={() => setSelectedSize(size)}
                                 >
-                                    {size}
+                                    {size.toUpperCase()} {/* Display as uppercase while storing lowercase */}
                                 </button>
                             ))}
                         </div>
@@ -255,8 +255,8 @@ const ProductPage = () => {
                         <div className="space-y-2">
                             <button
                                 className={`w-full py-2 px-4 rounded text-sm md:text-base ${mainProduct.stock_quantity <= 0
-                                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                        : 'bg-black text-white hover:bg-gray-600 cursor-pointer'
+                                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                    : 'bg-black text-white hover:bg-gray-600 cursor-pointer'
                                     }`}
                                 onClick={() => {
                                     if (mainProduct.stock_quantity > 0) {
@@ -267,11 +267,12 @@ const ProductPage = () => {
                                         }));
                                         addToCart(
                                             mainProduct.product_id,
-                                            selectedSize.toLowerCase(),
+                                            selectedSize.toLowerCase(), // Force lowercase
                                             1,
                                             `${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`,
-                                            parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price,
-                                            mainProduct.name, mainProduct.stock_quantity
+                                            parsedPriceSize.find(p => p.size.toLowerCase() === selectedSize.toLowerCase())?.price,
+                                            mainProduct.name,
+                                            mainProduct.stock_quantity
                                         );
                                     }
                                 }}
@@ -283,8 +284,8 @@ const ProductPage = () => {
 
                             <button
                                 className={`w-full mt-2 py-2 px-4 rounded text-sm md:text-base ${mainProduct.stock_quantity <= 0
-                                        ? 'bg-gray-300 text-gray-200 cursor-not-allowed'
-                                        : 'bg-green-500 text-white hover:bg-green-300 cursor-pointer'
+                                    ? 'bg-gray-300 text-gray-200 cursor-not-allowed'
+                                    : 'bg-green-500 text-white hover:bg-green-300 cursor-pointer'
                                     }`}
                                 onClick={() => {
                                     if (mainProduct.stock_quantity > 0) {
@@ -293,7 +294,7 @@ const ProductPage = () => {
                                             selectedSize.toLowerCase(),
                                             1,
                                             `${import.meta.env.VITE_SERVER_URL}/${mainProduct.hoverImage}`,
-                                            parsedPriceSize.find(p => p.size === selectedSize.toLowerCase())?.price,
+                                            parsedPriceSize.find(p => p.size.toLowerCase() === selectedSize.toLowerCase())?.price,
                                             mainProduct.name, mainProduct.stock_quantity
                                         );
                                         navigate(`/product/checkout/${mainProduct.product_id}`);
@@ -317,7 +318,7 @@ const ProductPage = () => {
                             {relatedProducts.map((product) => (
                                 <div
                                     key={product.product_id}
-                                    className="border rounded-lg overflow-hidden shadow-md md:shadow-lg"
+                                    className="border rounded-lg overflow-hidden shadow-md md:shadow-lg cursor-pointer"
                                     onClick={() => navigate(`/product/${product.name}`)}
                                 >
                                     <img
