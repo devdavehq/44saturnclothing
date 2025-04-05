@@ -26,111 +26,100 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
         event.preventDefault();
         setError(null);
         setSuccess(null);
-
-        if (products.length === 0) {
-            setError('Your cart is empty. Please add items to your cart before proceeding.');
-            return;
-        }
-
-        // Trim input fields
-        const trimmedEmail = email.trim();
-        const trimmedPhone = phone.trim();
-        const trimmedShippingAddress = shippingAddress.trim();
-        const trimmedBankName = bankName.trim(); // Trim bank name
-
-        if (!trimmedEmail || !trimmedPhone || !trimmedShippingAddress) {
-            setError('Please fill in all required fields.');
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append('email', trimmedEmail);
-        formData.append('phone', trimmedPhone);
-        formData.append('address', trimmedShippingAddress);
-        formData.append('total_amount', totalAmount);
-        formData.append('products', JSON.stringify(products));
-
-        // Conditionally add bank name to form data if it's available
-        if (paymentMethod === 'bank' && trimmedBankName) {
-            formData.append('bank_name', trimmedBankName);
-        }
-
+        setLoading(true);
+    
         try {
+            // Validate inputs
+            if (products.length === 0) {
+                throw new Error('Your cart is empty');
+            }
+    
+            const trimmedEmail = email.trim();
+            const trimmedPhone = phone.trim();
+            const trimmedShippingAddress = shippingAddress.trim();
+    
+            if (!trimmedEmail || !trimmedPhone || !trimmedShippingAddress) {
+                throw new Error('Please fill in all required fields');
+            }
+    
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('email', trimmedEmail);
+            formData.append('phone', trimmedPhone);
+            formData.append('address', trimmedShippingAddress);
+            formData.append('total_amount', totalAmount);
+            formData.append('products', JSON.stringify(products));
+            
+            if (paymentMethod === 'bank' && bankName.trim()) {
+                formData.append('bank_name', bankName.trim());
+            }
+    
+            // Make API call
             const response = await post('/create-bank-order', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            const { msg, ref } = response.data;
-            setSuccess(msg);
-            if (ref) {
-                setShowReferenceForm(true);
-            }
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data.msg) {
-                setError('Error processing payment: ' + error.response.data.msg);
-            } else if (error.message) {
-                setError('Error processing payment: ' + error.message);
+    
+            // Handle response
+            if (response.data && response.data.status === 'success') {
+                setSuccess(response.data.message);
+                if (response.data.ref) {
+                    setShowReferenceForm(true);
+                }
             } else {
-                setError('Error processing payment: An unknown error occurred.');
+                throw new Error(response.data?.message || 'Unexpected response from server');
             }
+    
+        } catch (error) {
+            setError(error.message || 'Error processing payment');
+        } finally {
+            setLoading(false);
         }
     };
-
+    
     const handleReferenceSubmit = async (event) => {
         event.preventDefault();
-        setError(null);
-        setSuccess(null);
-        setLoading(true); // Start loading
-
-        if (paymentMethod === 'bank' && referenceId === '') {
-            setRefError('Please enter your reference ID.');
-            setLoading(false); // Stop loading
-            return;
-        }
-
+        setRefError(null);
+        setLoading(true);
+    
         try {
-            let formData = new FormData();
-            formData.append('reference_id', referenceId);
+            if (paymentMethod === 'bank' && !referenceId.trim()) {
+                throw new Error('Please enter your reference ID');
+            }
+    
+            const formData = new FormData();
+            formData.append('reference_id', referenceId.trim());
             formData.append('totalAmount', totalAmount);
+    
             const response = await post('/verify-reference', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-
-            if (response.data.msg) {
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Payment Initialized',
-                    text: response.data.msg,
-                });
-
-                // Remove the items from the cart
-                products.forEach((product) => {
-                    removeFromCart(product.product_id, product.size);
-                });
-
-                // Update local storage with the remaining cart items
-                const updatedCart = products.filter(
-                    (product) => !products.some(
-                        (item) => item.product_id === product.product_id && item.size === product.size
-                    )
-                );
-                localStorage.setItem('cartMultiple', JSON.stringify(updatedCart));
-
-                // Close the reference form modal
-                setShowReferenceForm(false);
+    
+            if (response.data?.status !== 'success') {
+                throw new Error(response.data?.message || 'Payment verification failed');
             }
-        } catch (error) {
+    
+            // Success case
             Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.msg || 'An error occurred while verifying the payment.',
+                icon: 'success',
+                title: 'Payment Verified',
+                text: response.data.message,
             });
+    
+            // Clear cart
+            products.forEach((product) => {
+                removeFromCart(product.product_id, product.size);
+            });
+            localStorage.removeItem('cartMultiple');
+            setShowReferenceForm(false);
+    
+        } catch (error) {
+            setRefError(error.message);
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
     };
 
