@@ -476,6 +476,7 @@ const AddProduct = ({ onClose, currentProduct }) => {
               className="w-full p-1.5 border rounded-md focus:ring focus:ring-blue-300 text-sm"
               multiple
               name="images"
+ onClick={(e) => e.target.files?.length > 6 && alert("Max 6 images")}
             />
           </div>
           <div>
