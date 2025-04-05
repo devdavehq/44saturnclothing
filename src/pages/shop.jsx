@@ -237,14 +237,15 @@ const ShopPage = () => {
                                 whileHover={{ scale: 1.05 }}
                             >
                                 {/* Improved image container with proper sizing */}
-                                <div className="relative w-full h-72 md:h-80"> {/* Increased height for better image display */}
+                                <div className="relative w-full aspect-square overflow-hidden rounded-lg bg-gray-100 md:h-80"> {/* Increased height for better image display */}
                                     {item.stock_quantity <= 0 && (
                                         <div className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded-md z-10">Sold Out</div>
                                     )}
                                     <motion.img
                                         src={item.mainImage}
                                         alt={item.name}
-                                        className="w-full h-full object-contain rounded-lg"
+                                        className="w-full h-full object-cover rounded-lg"
+                                        style={{ position: 'absolute' }}
                                         initial={{ opacity: 1 }}
                                         whileHover={{ opacity: 0 }}
                                         transition={{ duration: 0.3 }}
@@ -252,7 +253,8 @@ const ShopPage = () => {
                                     <motion.img
                                         src={item.hoverImage}
                                         alt={item.name}
-                                        className="w-full h-full object-contain rounded-lg absolute top-0 left-0"
+                                        className="w-full h-full object-cover rounded-lg"
+                                        style={{ position: 'absolute' }}
                                         initial={{ opacity: 0 }}
                                         whileHover={{ opacity: 1 }}
                                         transition={{ duration: 0.3 }}
