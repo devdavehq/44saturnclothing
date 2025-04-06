@@ -114,15 +114,15 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
 
             // return console.log(response);
             
-            if (response.data) {
-                throw new Error(response.data?.msg || 'Payment verification failed');
+            if (!response.data) {
+                throw new Error('Payment verification failed');
             }
 
             // Success case
             Swal.fire({
                 icon: 'success',
                 title: 'Payment Verified',
-                text: response.data.message,
+                text: response.data.msg,
             });
 
             // Clear cart
