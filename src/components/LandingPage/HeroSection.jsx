@@ -26,11 +26,11 @@ const HeroSection = () => {
   return (
     <div className="relative min-h-[120vh] mt-10"> {/* Increased height */}
     <div
-      className="absolute inset-0 flex items-center justify-center"
+      className="absolute inset-0 flex items-center justify-center md:bg-[center_30%] bg-center"
       style={{
         backgroundImage: `url(${img || '../../../Images/background.jpg'})`,
         backgroundSize: 'cover', // Keeps your original styling
-        backgroundPosition: 'center',
+        
         backgroundRepeat: 'no-repeat',
         backgroundColor: '#1e293b',
         backgroundAttachment: 'fixed' // Keeps parallax effect
