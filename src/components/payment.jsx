@@ -60,7 +60,7 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-           return console.log(response);
+        //    return console.log(response);
             
             // Handle response
             if (!response || !response.data) {
