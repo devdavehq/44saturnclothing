@@ -60,7 +60,8 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-
+           return console.log(response);
+            
             // Handle response
             if (!response || !response.data) {
                 throw new Error('Empty response from server');
