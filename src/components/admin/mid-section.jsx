@@ -29,19 +29,21 @@ const Dashboard = () => {
       try {
         const res = await get("/metrics");
         if (res.error) throw new Error(res.error);
-
-        if (res.data) {
-          setTotalSales(res.data.totalSales.split(".")[0]);
-          setTotalOrders(res.data.totalOrders.split(".")[0]);
-          setTotalCustomers(res.data.totalCustomers.split(".")[0]);
-        }
+  
+        // No .split() needed! Directly use numbers.
+        setTotalSales(res.data.totalSales);  // Already a number
+        setTotalOrders(res.data.totalOrders);
+        setTotalCustomers(res.data.totalCustomers);
+  
+        // Optional: Format for display (e.g., add commas)
+        // setTotalSales(res.data.totalSales.toLocaleString());
       } catch (error) {
         console.error("Error fetching metrics:", error);
       }
     };
-
+  
     fetchMetrics();
-    const intervalId = setInterval(fetchMetrics, 10000); // Poll every 10 seconds
+    const intervalId = setInterval(fetchMetrics, 10000);
     return () => clearInterval(intervalId);
   }, []);
 
