@@ -112,6 +112,8 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
                 }
             });
 
+            return console.log(response);
+            
             if (response.data?.status !== 'success') {
                 throw new Error(response.data?.message || 'Payment verification failed');
             }
