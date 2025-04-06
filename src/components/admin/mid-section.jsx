@@ -25,28 +25,38 @@ const Dashboard = () => {
 
   // Fetch metrics (total sales, orders, customers)
   useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const res = await get("/metrics");
-        if (res.error) throw new Error(res.error);
+  const fetchMetrics = async () => {
+    try {
+      const response = await get('/metrics');
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error || 'Failed to fetch metrics');
+      
+      // Set raw numerical values
+      setTotalSales(data.totalSales || 0);
+      setTotalOrders(data.totalOrders || 0);
+      setTotalCustomers(data.totalCustomers || 0);
+      
+      // For display formatting (optional):
+      // setFormattedSales(formatNumber(data.totalSales));
+      // setFormattedOrders(formatNumber(data.totalOrders));
+      // setFormattedCustomers(formatNumber(data.totalCustomers));
+      
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+      // Optional: Set error state or show notification
+    }
+  };
 
-        console.log(res)
-        // No .split() needed! Directly use numbers.
-        setTotalSales(res.data.totalSales);  // Already a number
-        setTotalOrders(res.data.totalOrders);
-        setTotalCustomers(res.data.totalCustomers);
-  
-        // Optional: Format for display (e.g., add commas)
-        // setTotalSales(res.data.totalSales.toLocaleString());
-      } catch (error) {
-        console.error("Error fetching metrics:", error);
-      }
-    };
-  
-    fetchMetrics();
-    const intervalId = setInterval(fetchMetrics, 10000);
-    return () => clearInterval(intervalId);
-  }, []);
+  // Helper function for number formatting
+  // const formatNumber = (num) => {
+  //   return num?.toLocaleString('en-US') || '0';
+  // };
+
+  fetchMetrics();
+  const intervalId = setInterval(fetchMetrics, 10000);
+  return () => clearInterval(intervalId);
+}, []);
 
   // Fetch pending orders
   useEffect(() => {
