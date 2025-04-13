@@ -182,7 +182,7 @@ const ProductCard = () => {
               
               <div className="mt-2 sm:mt-4 ml-2 sm:ml-4 relative">
                 <a href={`/product/${product.name}`}>
-                  <h3 className="text-sm sm:text-lg font-semibold">{product.name}</h3>
+                  <h3 className="text-[10px] sm:text-lg font-semibold">{product.name}</h3>
                 </a>
                 <p className="text-xs sm:text-base text-gray-600">
                   ₦{Math.max(...product.prices).toLocaleString()}
