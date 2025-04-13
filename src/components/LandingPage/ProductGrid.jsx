@@ -190,7 +190,7 @@ const ProductCard = () => {
 
                 {/* Made cart button smaller on mobile */}
                 <button
-                  className={`p-1 rounded-sm absolute right-2 sm:right-4 top-2 sm:top-4 ${
+                  className={`p-1 rounded-sm absolute right-2 sm:right-4 top-4 ${
                     product.stock_quantity <= 0
                       ? 'opacity-50 cursor-not-allowed bg-gray-300'
                       : 'bg-black text-white cursor-pointer hover:bg-gray-800'
