@@ -29,7 +29,8 @@ const Dashboard = () => {
       try {
         const res = await get("/metrics");
         if (res.error) throw new Error(res.error);
-  
+
+        // console.log(res)
         // No .split() needed! Directly use numbers.
         setTotalSales(res.data.totalSales);  // Already a number
         setTotalOrders(res.data.totalOrders);
