@@ -24,7 +24,7 @@ const Dashboard = () => {
   }, []);
 
   // Fetch metrics (total sales, orders, customers)
-  useEffect(() => {
+ useEffect(() => {
     const fetchMetrics = async () => {
       try {
         const res = await get("/metrics");

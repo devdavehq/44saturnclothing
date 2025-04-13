@@ -72,3 +72,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@supports (-webkit-touch-callout: none) {
+  .ios-bg-scroll {
+    background-attachment: scroll !important;
+  }
+}
