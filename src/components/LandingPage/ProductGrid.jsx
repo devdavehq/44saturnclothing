@@ -157,10 +157,9 @@ const ProductCard = () => {
 
   return (
     <div className="container mx-auto py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-
+      {/* Changed grid classes to show 2 columns on mobile, 4 on larger screens */}
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
         {products.slice(0, 8).map((product) => (
-    
           <div key={product.id} className="relative cursor-pointer group">
             <motion.div
               className="relative"
@@ -169,32 +168,33 @@ const ProductCard = () => {
               whileHover={{ y: -5 }}
               transition={{ duration: 0.2 }}
             >
+              {/* Made image height responsive */}
               <motion.img
                 src={product.mainImage}
                 alt={product.name}
-                className="w-full h-[400px] object-cover rounded-lg sm:rounded-md"
+                className="w-full h-[200px] sm:h-[300px] md:h-[400px] object-cover rounded-lg sm:rounded-md"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: isHovered ? 0.8 : 1 }}
                 transition={{ duration: 0.3 }}
               />
-              {product.stock_quantity <= 0 && (
-                <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded-full text-sm">
-                  Sold out
-                </div>
-              )}
-              <div className="mt-4 ml-4 relative">
+              
+              {/* ... (keep all your existing product card content) */}
+              
+              <div className="mt-2 sm:mt-4 ml-2 sm:ml-4 relative">
                 <a href={`/product/${product.name}`}>
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
+                  <h3 className="text-sm sm:text-lg font-semibold">{product.name}</h3>
                 </a>
-                <p className="text-gray-600">
+                <p className="text-xs sm:text-base text-gray-600">
                   ₦{Math.max(...product.prices).toLocaleString()}
                 </p>
 
+                {/* Made cart button smaller on mobile */}
                 <button
-                  className={`p-1 rounded-sm absolute right-4 top-4 ${product.stock_quantity <= 0
+                  className={`p-1 rounded-sm absolute right-2 sm:right-4 top-2 sm:top-4 ${
+                    product.stock_quantity <= 0
                       ? 'opacity-50 cursor-not-allowed bg-gray-300'
                       : 'bg-black text-white cursor-pointer hover:bg-gray-800'
-                    }`}
+                  }`}
                   disabled={product.stock_quantity <= 0}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -210,15 +210,17 @@ const ProductCard = () => {
                         1,
                         product.mainImage,
                         Math.max(...product.prices),
-                        product.name, product.stock_quantity
+                        product.name, 
+                        product.stock_quantity
                       );
                     }
                   }}
                   aria-disabled={product.stock_quantity <= 0}
                 >
                   <ShoppingCart
-                    className={`h-5 w-5 ${product.stock_quantity <= 0 ? 'text-gray-500' : 'text-white'
-                      }`}
+                    className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                      product.stock_quantity <= 0 ? 'text-gray-500' : 'text-white'
+                    }`}
                   />
                 </button>
               </div>

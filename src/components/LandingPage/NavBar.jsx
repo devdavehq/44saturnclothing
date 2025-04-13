@@ -358,7 +358,7 @@ const NavBar = () => {
                                 </div>
                                 <button
                                     onClick={handleCheckout}
-                                    className="text-center  md:w-48 text-sm font-bold bg-black py-3 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out"
+                                    className="text-center px-3 sm:px-3 md:w-48 text-sm font-bold bg-black py-3 text-white rounded shadow hover:bg-gray-800 transition duration-300 ease-in-out"
                                 >
                                     Checkout
                                 </button>

@@ -83,7 +83,7 @@ const Newsletter = () => {
     
     </div>
     <p className="bg-gray-100 text-gray-600 text-sm text-center pb-3"><Link to="/returns&shippings">Return and Shipping poilcy</Link></p>
-    <p className="bg-gray-100 text-gray-600 text-sm text-center pb-3 pt-7">copyrignt&copy; 44saturnclothing 2025</p>
+    <p className="bg-gray-100 text-gray-600 text-sm text-center pb-3 pt-7">copyright&copy; 44saturnclothing 2025</p>
     </>
   );
 };
