@@ -147,12 +147,12 @@ const ProductCard = () => {
     };
 
     fetchRecentOrders(); // Fetch products on component mount
-    const intervalId = setInterval(fetchRecentOrders, 5500); // Poll every 10 seconds
+    /*const intervalId = setInterval(fetchRecentOrders, 5500); // Poll every 10 seconds
 
     return () => {
       isMounted = false;
       clearInterval(intervalId);
-    };
+    };*/
   }, []);
 
   return (
