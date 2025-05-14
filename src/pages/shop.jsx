@@ -249,6 +249,8 @@ const ShopPage = () => {
                                         initial={{ opacity: 1 }}
                                         whileHover={{ opacity: 0 }}
                                         transition={{ duration: 0.3 }}
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                     <motion.img
                                         src={item.hoverImage}
@@ -258,6 +260,8 @@ const ShopPage = () => {
                                         initial={{ opacity: 0 }}
                                         whileHover={{ opacity: 1 }}
                                         transition={{ duration: 0.3 }}
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                 </div>
 

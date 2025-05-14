@@ -176,6 +176,8 @@ const ProductCard = () => {
                 initial={{ opacity: 1 }}
                 animate={{ opacity: isHovered ? 0.8 : 1 }}
                 transition={{ duration: 0.3 }}
+                loading="lazy"
+                decoding="async"
               />
               
               {/* ... (keep all your existing product card content) */}

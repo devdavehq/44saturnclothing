@@ -154,53 +154,74 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
             formData.append('total_amount', totalAmount + currentFee);
             formData.append('products', JSON.stringify(products));
 
-            if (paymentMethod === 'bank' && bankName.trim() !== '') {
+            if (paymentMethod === 'bank' && bankName.trim() === '') {
+                return setError("Please fill in your bank name");
+               
+            }
+             
+
+            if(paymentMethod === 'bank' && bankName.trim() !== ''){
                 formData.append('bank_name', bankName.trim());
                 setError("");
-
-            } else if (paymentMethod === 'paystack' && bankName.trim() !== '') {
-                return setError("you cannot select Paystack and add Bankname");
-            } else {
-                return setError("All fields are required");
-            }
-
-
-            // Make API call
-            const response = await post('/create-bank-order', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
+                const response = await post('/create-bank-order', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                //    return console.log(response);
+    
+                // Handle response
+                if (!response || !response.data) {
+                    throw new Error("Server error could'nt complete payment");
                 }
-            });
-            //    return console.log(response);
+    
+                if (response.data && response.data.status === 'success') {
+                    const emailNotice = response.data.email_sent
+                        ? 'Check your email for payment details.'
+                        : 'If Email not sent - please contact support with your reference number.';
+                    // console.log(response);
+    
+                    setSuccess(`Order placed. ${emailNotice}`);
+    
+                    if (response.data.ref) {
+                        setShowReferenceForm(true);
+                        setEmail('')
+                        setShippingAddress('')
+                        setPhone('')
+                        setSelectedLocation('')
+                        setPaymentMethod('')
+                        setBankName('')
+                    }
+    
+                } else if (response.data.status === 'error') {
+                    throw new Error(response.data.message);
+                } else {
+                    throw new Error('Unexpected response format');
+                }
+            }else{
+                const response = await post('/create-order', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
 
-            // Handle response
-            if (!response || !response.data) {
-                throw new Error('Empty response from server');
-            }
-
-            if (response.data && response.data.status === 'success') {
-                const emailNotice = response.data.email_sent
-                    ? 'Check your email for payment details.'
-                    : 'If Email not sent - please contact support with your reference number.';
+                // console.log(response.data.authorization_url);
+                if (!response || !response.data) {
+                    throw new Error("Server error could'nt complete payment");
+                }
+        
+                // Redirect to Paystack payment page
                 // console.log(response);
-
-                setSuccess(`Order placed. ${emailNotice}`);
-
-                if (response.data.ref) {
-                    setShowReferenceForm(true);
-                    setEmail('')
-                    setShippingAddress('')
-                    setPhone('')
-                    setSelectedLocation('')
-                    setPaymentMethod('')
-                    setBankName('')
+                
+                if (response.data.authorization_url) {
+                    window.location.href = response.data.authorization_url;
+                    localStorage.removeItem('cartMultiple');
                 }
-
-            } else if (response.data.status === 'error') {
-                throw new Error(response.data.message);
-            } else {
-                throw new Error('Unexpected response format');
+                
             }
+            
+            // Make API call
+           
 
         } catch (error) {
             setError(error.message || 'Error processing payment');
@@ -257,6 +278,11 @@ const PaymentForm = ({ products, totalAmount, removeFromCart }) => {
             setLoading(false);
         }
     };
+
+
+
+
+    
 
     return (
         <div className="flex flex-col md:flex-row mx-auto p-6 bg-white rounded-lg my-12">

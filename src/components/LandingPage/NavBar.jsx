@@ -158,6 +158,8 @@ const NavBar = () => {
         });
     };
 
+    
+
     // Handle checkout with total as separate value
     const handleCheckout = () => {
         // Store total amount in localStorage

@@ -164,6 +164,8 @@ const Products = () => {
               src={row.original.imgUrl} // Use the imgUrl from the row data
               alt={row.original.name}   // Use the name from the row data as the alt text
               className="w-10 h-10"    // Optional: Add styling for the image
+              loading="lazy"
+              decoding="async"
             />
             
           </div>

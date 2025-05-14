@@ -192,6 +192,8 @@ const ProductPage = () => {
                                 src={`${import.meta.env.VITE_SERVER_URL}/${selectedImage}`}
                                 alt={mainProduct.name}
                                 className="w-full h-full object-contain object-center" // Changed to object-contain
+                                loading="lazy"
+                                decoding="async"
                             />
                         </motion.div>
                         {/* Thumbnail Images - Horizontal scroll on mobile */}
@@ -204,6 +206,8 @@ const ProductPage = () => {
 
                                     className="h-16 w-16 md:h-20 md:w-20 object-cover cursor-pointer rounded-md"
                                     onClick={() => setSelectedImage(image)}
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                             ))}
                         </div>
@@ -328,6 +332,8 @@ const ProductPage = () => {
                                         src={`${import.meta.env.VITE_SERVER_URL}/${product.hoverImage}`}
                                         alt={product.name}
                                         className="w-full h-32 md:h-48 object-cover"
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                     <div className="p-2 md:p-4">
                                         <h3 className="text-sm md:text-lg font-semibold line-clamp-1">{product.name}</h3>

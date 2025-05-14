@@ -232,7 +232,10 @@ const Dashboard = () => {
             {stocks.length > 0 ? (
               stocks.map((stock) => (
                 <div key={stock.id} className="p-4 bg-gray-100 rounded-lg shadow-md flex items-center gap-4">
-                  <img src={stock.image} className="w-12 h-12 bg-gray-300 rounded object-cover object-center" alt={stock.name} />
+                  <img src={stock.image} className="w-12 h-12 bg-gray-300 rounded object-cover object-center" alt={stock.name} 
+                   loading="lazy"
+                   decoding="async"
+                  />
                   <div>
                     <p className="font-semibold">{stock.name}</p>
                     <span className="text-sm text-gray-500">{stock.stock_quantity > 0 ? 'Available' : 'Sold out'}</span>
